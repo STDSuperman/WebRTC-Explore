@@ -1,0 +1,17 @@
+.local-page {
+  width: 600px;
+  height: 100%;
+  margin: 100px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid 1px #ccc;
+  border-radius: 10px;
+  height: 600px;
+  video {
+    height: 500px;
+    width: 500px;
+    background-color: #ccc;
+    border-radius: 10px;
+  }
+}
