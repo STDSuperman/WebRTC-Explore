@@ -1,28 +1,29 @@
 import './index.scss'
-import { useRef, useEffect } from 'react'
-import { PeerConnection, EventBus } from '@/utils'
+import { useRef, useEffect, useState } from 'react'
+import { initPeer, startCall } from '@/utils/helper'
+import type { IPeerConnectionWithMediaStream } from '@/utils/helper'
 
 const Local = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  // 初始化 RTC
-  const initPeer = async () => {
-    const RTCPeer = new PeerConnection();
-    const localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true
-    });
-    localStream.getTracks().forEach(track => RTCPeer.addTrack(track));
-    videoRef.current!.srcObject = localStream;
-  }
+  const [
+    peerWithMediaStream,
+    setPeerWithMediaStream
+  ] = useState<IPeerConnectionWithMediaStream>();
 
   useEffect(() => {
-    initPeer();
+    initPeer(videoRef)
+      .then(peerWithMda => {
+        setPeerWithMediaStream(peerWithMda);
+      });
   }, [])
 
   return (
     <div className='local-page'>
       <video ref={videoRef} autoPlay controls></video>
+      <div className='start-call' onClick={() => {
+        peerWithMediaStream
+          && startCall(peerWithMediaStream?.RTCPeer)
+      }}>呼叫</div>
     </div>
   );
 }
