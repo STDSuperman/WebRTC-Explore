@@ -11,11 +11,11 @@ const Local = () => {
   ] = useState<RTCPeerConnection>();
 
   useEffect(() => {
-    initPeer(videoRef, videoRef1)
+    initPeer(videoRef)
       .then(peerWithMda => {
         setRtcPeerInstance(peerWithMda);
       });
-    initPeer(videoRef1, videoRef1);
+    initPeer(videoRef1);
   }, [])
 
   return (

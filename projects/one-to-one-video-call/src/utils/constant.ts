@@ -5,7 +5,7 @@ export const enum EventsEnum {
   SET_REMOTE_ICE_CANDIDATE = 'SET_REMOTE_ICE_CANDIDATE',
   SET_LOCAL_ICE_CANDIDATE = 'SET_LOCAL_ICE_CANDIDATE'
 }
-export const enum DESCRIPTION_SET_TYPE {
+export const enum PEER_TYPE {
   LOCAL = 'LOCAL',
   REMOTE = 'REMOTE'
 }

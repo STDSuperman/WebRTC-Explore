@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger'
 import {
   RTC_OFFER_OPTION,
   EventsEnum,
-  DESCRIPTION_SET_TYPE
+  PEER_TYPE
 } from '@/utils/constant'
 
 export interface IPeerConnectionWithMediaStream {
@@ -14,8 +14,7 @@ export interface IPeerConnectionWithMediaStream {
 
 // 初始化 RTC
 export const initPeer = async (
-  videoRef: RefObject<HTMLVideoElement>,
-  testRef: RefObject<HTMLVideoElement>
+  videoRef: RefObject<HTMLVideoElement>
 ) => {
   const RTCPeer = new PeerConnection();
   logger.log('创建新 RTCPeer 实例');
@@ -23,7 +22,7 @@ export const initPeer = async (
   // 初始化呼叫端逻辑
   await initCallSide(RTCPeer);
   // 初始化作为被呼叫端逻辑
-  await initRemoteSide(RTCPeer, testRef);
+  await initRemoteSide(RTCPeer, videoRef);
 
   // 初始化额外数据
   RTCPeer.customData = {};
@@ -54,6 +53,7 @@ export const initCallSide = async (
     async (
       iceCandidate: RTCIceCandidate
     ) => {
+      if (RTCPeer.customData.type === PEER_TYPE.REMOTE) return;
       logger.log(`设置呼叫端 iceCandidate`)
       await RTCPeer.addIceCandidate(iceCandidate);
     }
@@ -63,7 +63,7 @@ export const initCallSide = async (
   EventBus.on(
     EventsEnum.SET_ANSWER_DESCRIPTION,
     async (answer: RTCSessionDescriptionInit) => {
-      if (RTCPeer.customData.type === DESCRIPTION_SET_TYPE.REMOTE) return;
+      if (RTCPeer.customData.type === PEER_TYPE.REMOTE) return;
       logger.log(`呼叫方设置 answer`)
       await RTCPeer.setRemoteDescription(answer);
     }
@@ -91,9 +91,10 @@ export const initRemoteSide = (
   // 被呼叫方设置 iceCandidate
   EventBus.on(
     EventsEnum.SET_REMOTE_ICE_CANDIDATE,
-    async (iceCandidate: RTCIceCandidate) => {
+    (iceCandidate: RTCIceCandidate) => {
+      if (peer.customData.type !== PEER_TYPE.REMOTE) return;
       logger.log(`设置远端 iceCandidate`)
-      await peer.addIceCandidate(iceCandidate);
+      peer.addIceCandidate(iceCandidate);
     }
   );
 
@@ -101,7 +102,7 @@ export const initRemoteSide = (
   EventBus.on(
     EventsEnum.SET_OFFER_DESCRIPTION,
     async (desc: RTCSessionDescriptionInit) => {
-      if (peer.customData.type === DESCRIPTION_SET_TYPE.LOCAL) return;
+      if (peer.customData.type === PEER_TYPE.LOCAL) return;
       logger.log(`设置远端 offer`);
       await peer.setRemoteDescription(desc);
       await handlerReplyAnswer(peer);
@@ -111,7 +112,7 @@ export const initRemoteSide = (
   // 被呼叫方收到流消息
   peer.addEventListener('track', e => {
     if (!videoRef.current) return;
-    logger.log(`收到 track 消息`)
+    logger.log(`被呼方收到 track 消息`)
     videoRef.current.srcObject = e.streams[0];
   });
 }
@@ -122,14 +123,14 @@ export const startCall = async (
   videoRef: React.RefObject<HTMLVideoElement>
 ) => {
   logger.log(`发起呼叫流程`)
-  await createAndAddStream(peer, videoRef);
+  await createAndAddStream( peer, videoRef);
   // 首先创建 offear
   const offer = await peer.createOffer(RTC_OFFER_OPTION);
   // 设置本地 offer 描述
   await peer.setLocalDescription(offer);
   logger.log(`设置呼叫端 offer`)
   // 设置作为呼叫方设置 desc 类型
-  peer.customData.type = DESCRIPTION_SET_TYPE.LOCAL;
+  peer.customData.type = PEER_TYPE.LOCAL;
   // 通知远端设置 offer 描述
   EventBus.emit(
     EventsEnum.SET_OFFER_DESCRIPTION,
@@ -141,7 +142,7 @@ export const startCall = async (
 export const handlerReplyAnswer = async (peer: RTCPeerConnection) => {
   const answer = await peer.createAnswer();
   await peer.setLocalDescription(answer);
-  peer.customData.type = DESCRIPTION_SET_TYPE.REMOTE;
+  peer.customData.type = PEER_TYPE.REMOTE;
   logger.log(`远端创建 answer 并推送呼叫端`)
   EventBus.emit(
     EventsEnum.SET_ANSWER_DESCRIPTION,
