@@ -1,29 +1,30 @@
 import './index.scss'
 import { useRef, useEffect, useState } from 'react'
 import { initPeer, startCall } from '@/utils/helper'
-import type { IPeerConnectionWithMediaStream } from '@/utils/helper'
 
 const Local = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef1 = useRef<HTMLVideoElement>(null);
   const [
-    peerWithMediaStream,
-    setPeerWithMediaStream
-  ] = useState<IPeerConnectionWithMediaStream>();
+    rtcPeerInstance,
+    setRtcPeerInstance
+  ] = useState<RTCPeerConnection>();
 
   useEffect(() => {
-    initPeer(videoRef)
+    initPeer(videoRef, videoRef1)
       .then(peerWithMda => {
-        setPeerWithMediaStream(peerWithMda);
+        setRtcPeerInstance(peerWithMda);
       });
+    initPeer(videoRef1, videoRef1);
   }, [])
 
   return (
     <div className='local-page'>
       <video ref={videoRef} autoPlay controls></video>
-      <div className='start-call' onClick={() => {
-        peerWithMediaStream
-          && startCall(peerWithMediaStream?.RTCPeer)
-      }}>呼叫</div>
+      <video ref={videoRef1} autoPlay controls></video>
+      <button className='start-call' onClick={() => {
+        rtcPeerInstance && startCall(rtcPeerInstance, videoRef)
+      }}>呼叫</button>
     </div>
   );
 }

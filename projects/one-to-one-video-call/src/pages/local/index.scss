@@ -8,10 +8,14 @@
   border: solid 1px #ccc;
   border-radius: 10px;
   height: 600px;
+  flex-direction: column;
   video {
     height: 500px;
     width: 500px;
     background-color: #ccc;
     border-radius: 10px;
+  }
+  .start-call {
+    margin: 20px auto;
   }
 }
