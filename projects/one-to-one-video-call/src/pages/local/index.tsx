@@ -1,10 +1,12 @@
 import './index.scss'
 import { useRef, useEffect, useState } from 'react'
-import { initPeer, startCall } from '@/utils/helper'
+import { initPeer, startCall } from '@/utils/RTC'
+import { findOnePeerIdWithRandom } from '@/utils/RTC/store'
 
 const Local = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoRef1 = useRef<HTMLVideoElement>(null);
+  const [connectPeerId, setConnectPeerId] = useState('');
   const [
     rtcPeerInstance,
     setRtcPeerInstance
@@ -12,8 +14,9 @@ const Local = () => {
 
   useEffect(() => {
     initPeer(videoRef)
-      .then(peerWithMda => {
-        setRtcPeerInstance(peerWithMda);
+      .then(peer => {
+        setRtcPeerInstance(peer);
+        setConnectPeerId(findOnePeerIdWithRandom(peer.id));
       });
     initPeer(videoRef1);
   }, [])
@@ -23,7 +26,7 @@ const Local = () => {
       <video ref={videoRef} autoPlay controls></video>
       <video ref={videoRef1} autoPlay controls></video>
       <button className='start-call' onClick={() => {
-        rtcPeerInstance && startCall(rtcPeerInstance, videoRef)
+        rtcPeerInstance && startCall(rtcPeerInstance, connectPeerId, videoRef);
       }}>呼叫</button>
     </div>
   );

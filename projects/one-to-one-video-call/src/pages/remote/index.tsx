@@ -1,7 +1,6 @@
-import { EventBus } from '@/utils'
 import './index.scss'
 import { useRef, useEffect, useState } from 'react'
-import { initPeer, IPeerConnectionWithMediaStream } from '@/utils/helper'
+import { initPeer, IPeerConnectionWithMediaStream } from '@/utils/RTC'
 
 const Remote = () => {
   const videoRef = useRef(null);
@@ -11,13 +10,7 @@ const Remote = () => {
   ] = useState<IPeerConnectionWithMediaStream>();
 
   useEffect(() => {
-    initPeer(videoRef)
-      .then(peerWithMda => {
-        setPeerWithMediaStream(peerWithMda);
-        peerWithMda.RTCPeer.ontrack = track => {
-          console.log(track);
-        }
-      });
+    initPeer(videoRef);
   }, [])
 
   return (

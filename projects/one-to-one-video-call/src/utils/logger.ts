@@ -1,16 +1,17 @@
 import consola from "consola";
+import chalk from "chalk";
 
 export class Logger {
-  log(message: string) {
-    consola.log(message);
+  log(...message: string[]) {
+    consola.log(`[LOG]：${message.join('-')}`);
   }
   
-  warn(message: string) {
-    consola.warn(message);
+  warn(...message: string[]) {
+    consola.warn(chalk.yellow(`[WARN]：${message.join('-')}`));
   }
 
-  error(message: string) {
-    consola.error(message);
+  error(...message: string[]) {
+    consola.error(chalk.red(`[ERROR]：${message.join('-')}`));
   }
 }
 

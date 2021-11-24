@@ -5,7 +5,6 @@ declare interface Window {
   webkitRTCPeerConnection: RTCPeerConnection;
 }
 declare interface RTCPeerConnection {
-  customData: {
-    type?: string;
-  };
+  id: string;
+  eventEmitter: any;
 }
