@@ -1,3 +1,4 @@
+import React from 'react';
 import './index.scss'
 import { useRef, useEffect, useState } from 'react'
 import { initPeer, startCall } from '@/utils/RTC'

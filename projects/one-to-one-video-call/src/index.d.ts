@@ -7,4 +7,5 @@ declare interface Window {
 declare interface RTCPeerConnection {
   id: string;
   eventEmitter: any;
+  new (configuration?: RTCConfiguration): RTCPeerConnection;
 }
