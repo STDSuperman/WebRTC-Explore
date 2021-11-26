@@ -34,7 +34,7 @@ export const initPeer = async (
   setPeer(RTCPeer.id, RTCPeer)
   // 添加事件中心
   RTCPeer.eventEmitter = getEventEmitter();
-  
+
   // 初始化呼叫端逻辑
   await initCallSide(RTCPeer);
   // 初始化作为被呼叫端逻辑

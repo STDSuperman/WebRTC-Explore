@@ -9,3 +9,4 @@ export const enum PEER_TYPE {
   LOCAL = 'LOCAL',
   REMOTE = 'REMOTE'
 }
+export const RTC_SOCKET_PATH = '/RTC_SOCKET_PATH'
