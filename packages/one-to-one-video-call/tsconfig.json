@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "useDefineForClassFields": true,
-    "isolatedModules": true,
     "baseUrl": "./src",
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -19,11 +18,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "types": ["vite/client"],
+    "isolatedModules": false,
     "paths": {
       "@/*": ["./*"]
     }
   },
-  "include": ["./src", "bootstrap.ts", "./node_modules/@types"],
+  "include": ["./src", "bootstrap.ts"],
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"

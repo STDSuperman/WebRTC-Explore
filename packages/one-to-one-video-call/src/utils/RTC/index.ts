@@ -2,10 +2,11 @@ import { RefObject } from 'react';
 import { PeerConnection, getEventEmitter } from '@/utils'
 import { logger } from '@/utils/logger'
 import { getPeer, setPeer, getUniId } from './store'
+import React from 'react'
 import {
   RTC_OFFER_OPTION,
-  EventsEnum
 } from '@/utils/constant'
+import { SocketEventsEnum } from '@p2p/types'
 
 export interface IPeerConnectionWithMediaStream {
   RTCPeer: RTCPeerConnection;
@@ -51,7 +52,7 @@ export const initCallSide = async (
 ) => {
   // 呼叫方设置 iceCandidate
   RTCPeer.eventEmitter.on(
-    EventsEnum.SET_LOCAL_ICE_CANDIDATE,
+    SocketEventsEnum.SET_LOCAL_ICE_CANDIDATE,
     async (
       { candidate }: ICandidateInfo
     ) => {
@@ -62,7 +63,7 @@ export const initCallSide = async (
 
   // 呼叫方设置远端发送过来的 answer 到本地 desc
   RTCPeer.eventEmitter.on(
-    EventsEnum.SET_ANSWER_DESCRIPTION,
+    SocketEventsEnum.SET_ANSWER_DESCRIPTION,
     async (answer: RTCSessionDescriptionInit) => {
       logger.log(`呼叫方设置 answer`)
       await RTCPeer.setRemoteDescription(answer);
@@ -80,7 +81,7 @@ export const initRemoteSide = (
 
   // 被呼叫方设置 iceCandidate
   peer.eventEmitter.on(
-    EventsEnum.SET_REMOTE_ICE_CANDIDATE,
+    SocketEventsEnum.SET_ICE_CANDIDATE,
     ({ candidate }: ICandidateInfo) => {
       logger.log(`设置远端 iceCandidate`)
       peer.addIceCandidate(candidate);
@@ -89,7 +90,7 @@ export const initRemoteSide = (
 
   // 被呼叫方设置远端连接发送过来的 offer
   peer.eventEmitter.on(
-    EventsEnum.SET_OFFER_DESCRIPTION,
+    SocketEventsEnum.SET_OFFER_DESCRIPTION,
     async ({ offer, fromPeer }: IOfferInfo) => {
       logger.log(`设置远端 offer`);
       await peer.setRemoteDescription(offer);
@@ -121,7 +122,7 @@ const bindCallSideEvents = (
     if (event.candidate) {
       logger.log(`呼叫方拿到 candidate`)
       targetPeer.eventEmitter.emit(
-        EventsEnum.SET_REMOTE_ICE_CANDIDATE,
+        SocketEventsEnum.SET_ICE_CANDIDATE,
         {
           candidate: event.candidate,
           fromPeer: peer
@@ -139,7 +140,7 @@ const bindReceivedSideEvents = (
 ) => {
   // 通知远端设置 offer 描述
   targetPeer.eventEmitter.emit(
-    EventsEnum.SET_OFFER_DESCRIPTION,
+    SocketEventsEnum.SET_OFFER_DESCRIPTION,
     {
       offer,
       fromPeer: peer
@@ -155,7 +156,7 @@ const bindReceivedSideEvents = (
     if (e.candidate) {
       logger.log(`被呼叫方拿到 candidate`);
       peer.eventEmitter.emit(
-        EventsEnum.SET_LOCAL_ICE_CANDIDATE,
+        SocketEventsEnum.SET_LOCAL_ICE_CANDIDATE,
         {
           candidate: e.candidate,
           fromPeer: targetPeer
@@ -198,7 +199,7 @@ export const handlerReplyAnswer = async (
 
   logger.log(`远端创建 answer 并推送呼叫端`)
   fromPeer.eventEmitter.emit(
-    EventsEnum.SET_ANSWER_DESCRIPTION,
+    SocketEventsEnum.SET_ANSWER_DESCRIPTION,
     answer
   )
 }

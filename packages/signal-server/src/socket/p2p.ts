@@ -6,11 +6,16 @@ import {
   Inject,
   WSEmit,
 } from '@midwayjs/decorator';
-import { SocketRequestEvent, SocketResponseEvent } from '../interface';
-import { Context } from '@midwayjs/socketio';
+import type { Context } from '@midwayjs/socketio';
+
+export const enum EventsEnum {
+  SET_OFFER_DESCRIPTION = 'SET_OFFER_DESCRIPTION',
+  SET_ANSWER_DESCRIPTION = 'SET_ANSWER_DESCRIPTION',
+  SET_REMOTE_ICE_CANDIDATE = 'SET_REMOTE_ICE_CANDIDATE'
+}
 
 @Provide()
-@WSController('/')
+@WSController('/p2p')
 export class HelloSocketController {
   @Inject()
   ctx: Context;
@@ -20,8 +25,8 @@ export class HelloSocketController {
     console.log('on client connect', this.ctx.id);
   }
 
-  @OnWSMessage(SocketRequestEvent.GREET)
-  @WSEmit(SocketResponseEvent.GREET)
+  @OnWSMessage(EventsEnum.SET_OFFER_DESCRIPTION)
+  @WSEmit(EventsEnum.SET_OFFER_DESCRIPTION)
   async gotMessage(data1, data2, data3) {
     return {
       name: 'harry',

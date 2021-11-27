@@ -1,0 +1,19 @@
+{
+  "name": "@p2p/types",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "tsnd --respawn --transpile-only ./src/p2p.ts",
+    "build:watch": "tsc --watch",
+    "build": "tsc",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.2"
+  }
+}
