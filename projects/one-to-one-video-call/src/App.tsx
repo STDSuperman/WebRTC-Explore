@@ -1,5 +1,4 @@
 import React from 'react';
-import './App.css'
 
 interface IProps {
   children?: any

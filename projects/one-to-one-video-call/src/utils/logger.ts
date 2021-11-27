@@ -5,7 +5,7 @@ export class Logger {
   log(...message: string[]) {
     consola.log(`[LOG]：${message.join('-')}`);
   }
-  
+
   warn(...message: string[]) {
     consola.warn(chalk.yellow(`[WARN]：${message.join('-')}`));
   }

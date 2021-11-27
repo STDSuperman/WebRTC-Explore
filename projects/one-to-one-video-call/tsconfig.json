@@ -18,15 +18,20 @@
     "jsx": "react",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["vite/client", "jest"],
+    "types": ["vite/client"],
     "paths": {
       "@/*": ["./*"]
     }
   },
-  "include": ["./src"],
+  "include": ["./src", "bootstrap.ts", "./node_modules/@types"],
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"
     }
-  }
+  },
+  "exclude": [
+    "dist",
+    "node_modules",
+    "test"
+  ]
 }

@@ -1,2 +1,3 @@
-# WebRTC-Explore
-For WebRTC exercises only.
+## WebRTC-explore
+
+This is a simple template project.

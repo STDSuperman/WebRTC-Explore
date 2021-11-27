@@ -1,16 +1,16 @@
+import React from 'react'
 import './index.scss'
 import { useRef, useEffect, useState } from 'react'
-import { initPeer, IPeerConnectionWithMediaStream } from '@/utils/RTC'
+import { P2PConnection } from '@/utils/p2p-sdk'
 
-const Remote = () => {
+const Remote2 = () => {
   const videoRef = useRef(null);
-  const [
-    peerWithMediaStream,
-    setPeerWithMediaStream
-  ] = useState<IPeerConnectionWithMediaStream>();
 
   useEffect(() => {
-    initPeer(videoRef);
+    // const p2pInstance = new P2PConnection();
+    // p2pInstance.on('P2PConnection', e => {
+    //   console.log(e)
+    // })
   }, [])
 
   return (
@@ -20,4 +20,4 @@ const Remote = () => {
   );
 }
 
-export default Remote;
+export default Remote2;

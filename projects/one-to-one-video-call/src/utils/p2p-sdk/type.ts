@@ -12,6 +12,8 @@ export interface IOfferInfo {
 }
 
 export enum P2PSocketEventsType {
-	START_P2P_CONNECTION = "START_P2P_CONNECTION",
-  TRACK = "TRACK",
+	P2PConnection = "P2PConnection",
+  track = "track",
 }
+
+export type IEmiterCallback = (...args: unknown[]) => void;

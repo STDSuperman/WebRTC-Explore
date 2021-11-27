@@ -8,7 +8,8 @@ import { RTC_OFFER_OPTION, EventsEnum } from "@/utils/constant";
 import {
   P2PSocketEventsType,
   ICandidateInfo,
-  IOfferInfo
+  IOfferInfo,
+	IEmiterCallback
 } from './type'
 
 export class P2PConnection {
@@ -20,11 +21,15 @@ export class P2PConnection {
 	}
 
 	init() {
-		this.socketInstance = getSocketInstance(RTC_SOCKET_PATH);
+		this.socketInstance = getSocketInstance();
 		this.peerInstance = new PeerConnection();
 		this.eventEmitter = getEventEmitter();
-		this.socketInstance.on("connection", (e) => {
-			console.log(e);
+		this.socketInstance.on('error', e => {
+			logger.error(e)
+		})
+		this.socketInstance.on("connect", () => {
+			console.log('connect');
+			this.socketInstance.emit('great', 'xxx')
 		});
 	}
 
@@ -33,7 +38,7 @@ export class P2PConnection {
 		const offer = await this.peerInstance.createOffer(RTC_OFFER_OPTION);
 		// 设置本地 offer 描述
 		await this.peerInstance.setLocalDescription(offer);
-		this.socketInstance.emit(P2PSocketEventsType.START_P2P_CONNECTION, offer);
+		this.socketInstance.emit(P2PSocketEventsType.P2PConnection, offer);
 	}
 
 	bindEvents() {
@@ -67,7 +72,7 @@ export class P2PConnection {
 
 		// 收到流消息
 		this.peerInstance.addEventListener("track", (e) => {
-			this.eventEmitter.emit(P2PSocketEventsType.TRACK, e);
+			this.eventEmitter.emit(P2PSocketEventsType.track, e);
 		});
 
     // p2p 连接状态更改
@@ -80,7 +85,7 @@ export class P2PConnection {
       if (e.candidate) {
         logger.log(`拿到 candidate`);
         this.socketInstance.emit(
-          EventsEnum.SET_LOCAL_ICE_CANDIDATE,
+          EventsEnum.SET_REMOTE_ICE_CANDIDATE,
           e.candidate
         );
       }
@@ -95,7 +100,7 @@ export class P2PConnection {
 		this.socketInstance.emit(EventsEnum.SET_ANSWER_DESCRIPTION, answer);
 	}
 
-	on(eventType: string, listener) {
+	on(eventType: keyof typeof P2PSocketEventsType, listener: IEmiterCallback) {
 		return this.eventEmitter.on(eventType, listener);
 	}
 }

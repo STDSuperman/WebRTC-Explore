@@ -1,5 +1,6 @@
 import Local from '@/pages/local'
-import Remote from '@/pages/remote'
+import Remote1 from '@/pages/remote/remote1'
+import Remote2 from '@/pages/remote/remote2'
 import App from '@/App'
 import { RouteConfig } from 'react-router-config'
 
@@ -14,7 +15,11 @@ export const routes: RouteConfig[] = [
     component: Local
   },
   {
-    path: '/remote',
-    component: Remote
+    path: '/remote1',
+    component: Remote1
+  },
+  {
+    path: '/remote2',
+    component: Remote2
   }
 ]
