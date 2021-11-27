@@ -1,6 +1,6 @@
 {
-  "name": "@p2p/types",
-  "version": "1.0.0",
+  "name": "p2p-types",
+  "version": "0.0.1-beta",
   "main": "dist/index.js",
   "license": "MIT",
   "private": false,
@@ -11,7 +11,8 @@
     "dev": "tsnd --respawn --transpile-only ./src/p2p.ts",
     "build:watch": "tsc --watch",
     "build": "tsc",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "typescript": "^4.5.2"

@@ -1,10 +1,10 @@
 {
-  "include": ["projects"],
+  "include": ["packages"],
   "exclude": ["tests", "node_modules"],
   "compilerOptions": {
     "module": "CommonJS",
     "target": "ES2018",
-    "lib": ["esnext"],
+    "lib": ["esnext", "DOM", ""],
     "importHelpers": true,
     "declaration": true,
     "declarationDir": "dist/types",

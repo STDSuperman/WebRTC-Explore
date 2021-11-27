@@ -1,5 +1,0 @@
-packages:
-  - "packages/**"
-link-workspace-packages: true
-prefer-workspace-packages​: true
-shared-workspace-lockfile​: true  

@@ -6,7 +6,7 @@ import React from 'react'
 import {
   RTC_OFFER_OPTION,
 } from '@/utils/constant'
-import { SocketEventsEnum } from '@p2p/types'
+import { SocketEventsEnum } from 'p2p-types'
 
 export interface IPeerConnectionWithMediaStream {
   RTCPeer: RTCPeerConnection;

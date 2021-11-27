@@ -11,7 +11,7 @@ import {
 	IEmiterCallback,
 	IBaseConfig
 } from './type'
-import { SocketEventsEnum } from '@p2p/types'
+import { SocketEventsEnum } from 'p2p-types'
 
 export class P2PConnection {
 	public socketInstance: Socket;
