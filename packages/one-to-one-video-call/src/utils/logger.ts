@@ -2,15 +2,15 @@ import consola from "consola";
 import chalk from "chalk";
 
 export class Logger {
-  log(...message: string[]) {
+  log(...message: unknown[]): void {
     consola.log(`[LOG]：${message.join('-')}`);
   }
 
-  warn(...message: string[]) {
+  warn(...message: unknown[]): void {
     consola.warn(chalk.yellow(`[WARN]：${message.join('-')}`));
   }
 
-  error(...message: string[]) {
+  error(...message: unknown[]): void {
     consola.error(chalk.red(`[ERROR]：${message.join('-')}`));
   }
 }

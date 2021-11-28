@@ -1,24 +1,35 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["ESNext"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "inlineSourceMap":true,
+    "inlineSourceMap": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "stripInternal": true,
     "skipLibCheck": false,
     "pretty": true,
     "declaration": true,
-    "typeRoots": [ "./typings", "./node_modules/@types"],
-    "outDir": "dist"
+    "typeRoots": [
+      "./typings",
+      "./node_modules/@types"
+    ],
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "dist",
     "node_modules",
     "test"
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

@@ -1,22 +1,32 @@
 {
   "compilerOptions": {
+    "target": "ES5",
+    "module": "CommonJS",
+    "rootDir": "src",
     "outDir": "dist",
-    "target": "ES2018",
-    "module": "commonjs",
+    "newLine": "LF",
+    "lib": [
+      "dom",
+      "scripthost",
+      "esnext"
+    ],
     "moduleResolution": "node",
-    "lib": ["es2018", "esnext.asynciterable"],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "inlineSourceMap": false,
-    "noImplicitThis": true,
-    "noUnusedLocals": false,
-    "stripInternal": true,
-    "skipLibCheck": true,
-    "pretty": true,
+    "importHelpers": true,
     "declaration": true,
-    "esModuleInterop": true,
-    "isolatedModules": false
+    "pretty": true,
+    "sourceMap": false,
+    "inlineSources": false,
+    "noUnusedLocals": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "dist",
+    "es",
+    "lib"
+  ]
 }

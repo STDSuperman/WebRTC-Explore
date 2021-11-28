@@ -7,6 +7,7 @@ import {
   RTC_OFFER_OPTION,
 } from '@/utils/constant'
 import { SocketEventsEnum } from 'p2p-types'
+import { createAndAddStream } from '@/utils/helper'
 
 export interface IPeerConnectionWithMediaStream {
   RTCPeer: RTCPeerConnection;
@@ -202,19 +203,4 @@ export const handlerReplyAnswer = async (
     SocketEventsEnum.SET_ANSWER_DESCRIPTION,
     answer
   )
-}
-
-export const createAndAddStream = async (
-  peer: RTCPeerConnection,
-  videoRef: React.RefObject<HTMLVideoElement>
-) => {
-  // 获取视频流
-  const mediaStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true
-  });
-  videoRef.current!.srcObject = mediaStream;
-  logger.log(`添加并设置呼叫方视频流`)
-  // 为 video 添加视频流
-  mediaStream.getTracks().forEach(track => peer.addTrack(track, mediaStream));
 }

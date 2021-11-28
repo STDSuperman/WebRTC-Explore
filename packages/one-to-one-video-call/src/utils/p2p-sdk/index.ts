@@ -6,18 +6,26 @@ import { logger } from "@/utils/logger";
 import { RTC_OFFER_OPTION } from "@/utils/constant";
 import {
   P2PSocketEventsType,
-  ICandidateInfo,
-  IOfferInfo,
 	IEmiterCallback,
 	IBaseConfig
 } from './type'
-import { SocketEventsEnum } from 'p2p-types'
+import {
+	SocketEventsEnum,
+	ICandidateInfo,
+	IOfferInfo,
+	IConnectionInfo,
+	IAnswerInfo
+}  from 'p2p-types'
+
+export * from './type'
 
 export class P2PConnection {
 	public socketInstance: Socket;
 	public peerInstance: RTCPeerConnection;
 	public eventEmitter: EventEmitter;
 	public baseConfig: IBaseConfig;
+	private id: string;
+	private currentConnectTargetId: string;
 	constructor(props?: IBaseConfig) {
 		this.init();
 		this.baseConfig = props;
@@ -28,30 +36,41 @@ export class P2PConnection {
 			this.socketInstance = getSocketInstance(this.baseConfig?.socketConfig);
 			this.peerInstance = new PeerConnection();
 			this.eventEmitter = getEventEmitter();
+			this.bindEvents();
 			this.socketInstance.on('error', e => {
 				reject(e);
 			})
-			this.socketInstance.on("connect", () => {
-				logger.log('connection');
-				this.eventEmitter.emit("socketConnect");
+
+			this.socketInstance.on(SocketEventsEnum.CONNECTION, (
+				connectionInfo: IConnectionInfo
+			) => {
+				this.id = connectionInfo.id;
+				logger.log(`connected, my id is ${this.id}`);
 				resolve(true);
-			});
+			})
 		})
 	}
 
-	async call() {
+	async call(targetId) {
+		logger.log(`start call ${targetId}, my id is ${this.id}`);
     // 创建 offer
 		const offer = await this.peerInstance.createOffer(RTC_OFFER_OPTION);
 		// 设置本地 offer 描述
 		await this.peerInstance.setLocalDescription(offer);
-		this.socketInstance.emit(SocketEventsEnum.SET_OFFER_DESCRIPTION, offer);
+		this.currentConnectTargetId = targetId;
+		this.socketInstance.emit(SocketEventsEnum.SET_OFFER_DESCRIPTION, {
+			offer,
+			fromId: this.id,
+			targetId: this.currentConnectTargetId
+		});
 	}
 
 	bindEvents() {
 		// 接收并到 answer 消息设置到本地 peer desc
 		this.socketInstance.on(
 			SocketEventsEnum.SET_ANSWER_DESCRIPTION,
-			async (answer: RTCSessionDescriptionInit) => {
+			async (answerInfo: string) => {
+				const { answer } = JSON.parse(answerInfo) as unknown as IAnswerInfo;
 				logger.log(`设置 answer`);
 				await this.peerInstance.setRemoteDescription(answer);
 			}
@@ -60,7 +79,8 @@ export class P2PConnection {
 		// 接收并设置 iceCandidate
 		this.socketInstance.on(
 			SocketEventsEnum.SET_ICE_CANDIDATE,
-			async ({ candidate }: ICandidateInfo) => {
+			async (candidateInfo: string) => {
+				const { candidate } = JSON.parse(candidateInfo) as ICandidateInfo
 				logger.log(`设置 iceCandidate`);
 				await this.peerInstance.addIceCandidate(candidate);
 			}
@@ -69,7 +89,9 @@ export class P2PConnection {
 		// 接收并设置远端连接发送过来的 offer
 		this.socketInstance.on(
 			SocketEventsEnum.SET_OFFER_DESCRIPTION,
-			async ({ offer }: IOfferInfo) => {
+			async (offerInfo: string) => {
+				const { offer, fromId } = JSON.parse(offerInfo) as unknown as IOfferInfo;
+				this.currentConnectTargetId = fromId;
 				logger.log(`设置远端 offer`);
 				await this.peerInstance.setRemoteDescription(offer);
 				await this.handlerReplyAnswer();
@@ -78,6 +100,7 @@ export class P2PConnection {
 
 		// 收到流消息
 		this.peerInstance.addEventListener("track", (e) => {
+			logger.log("拿到流消息")
 			this.eventEmitter.emit(P2PSocketEventsType.track, e);
 		});
 
@@ -92,7 +115,11 @@ export class P2PConnection {
         logger.log(`拿到 candidate`);
         this.socketInstance.emit(
           SocketEventsEnum.SET_ICE_CANDIDATE,
-          e.candidate
+          <ICandidateInfo>{
+						candidate: e.candidate,
+						fromId: this.id,
+						targetId: this.currentConnectTargetId
+					}
         );
       }
     })
@@ -103,7 +130,11 @@ export class P2PConnection {
 		await this.peerInstance.setLocalDescription(answer);
 
 		logger.log(`创建 answer 并推送`);
-		this.socketInstance.emit(SocketEventsEnum.SET_ANSWER_DESCRIPTION, answer);
+		this.socketInstance.emit(SocketEventsEnum.SET_ANSWER_DESCRIPTION, <IAnswerInfo>{
+			answer,
+			fromId: this.id,
+			targetId: this.currentConnectTargetId
+		});
 	}
 
 	on(eventType: keyof typeof P2PSocketEventsType, listener: IEmiterCallback) {

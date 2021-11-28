@@ -4,14 +4,6 @@ export interface IPeerConnectionWithMediaStream {
 	mediaStream: MediaStream;
 }
 
-export interface ICandidateInfo {
-	candidate: RTCIceCandidate;
-}
-
-export interface IOfferInfo {
-	offer: RTCSessionDescriptionInit;
-}
-
 export enum P2PSocketEventsType {
 	P2PConnection = "P2PConnection",
   track = "track",
