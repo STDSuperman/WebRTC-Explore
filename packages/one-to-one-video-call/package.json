@@ -11,7 +11,7 @@
     "consola": "^2.15.3",
     "events": "^3.3.0",
     "koa-bodyparser": "^4.3.0",
-    "p2p-types": "0.0.1-beta.3",
+    "p2p-types": "0.0.1-beta.4",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-router": "4.3.1",

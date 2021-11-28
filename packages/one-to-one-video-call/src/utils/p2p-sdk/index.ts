@@ -1,16 +1,16 @@
 import { PeerConnection, getEventEmitter } from "@/utils";
 import { EventEmitter } from "events";
-import { getSocketInstance } from "@/utils/socket-client";
-import type { Socket } from "socket.io-client";
 import { logger } from "@/utils/logger";
 import { RTC_OFFER_OPTION } from "@/utils/constant";
 import {
   P2PSocketEventsType,
-	IEmiterCallback,
-	IBaseConfig
+	ICommonEventCallback,
+	IBaseConfig,
+	ISocketInstance
 } from './type'
 import {
-	SocketEventsEnum,
+	SocketEmitEnum,
+	SocketListenEnum,
 	ICandidateInfo,
 	IOfferInfo,
 	IConnectionInfo,
@@ -20,56 +20,61 @@ import {
 export * from './type'
 
 export class P2PConnection {
-	public socketInstance: Socket;
+	public socketInstance: ISocketInstance;
 	public peerInstance: RTCPeerConnection;
 	public eventEmitter: EventEmitter;
 	public baseConfig: IBaseConfig;
-	private id: string;
 	private currentConnectTargetId: string;
-	constructor(props?: IBaseConfig) {
+	constructor(props: IBaseConfig) {
 		this.init();
 		this.baseConfig = props;
+		this.checkProps();
+	}
+
+	checkProps() {
+		const { socketInstance } = this.baseConfig || {};
+		if (!socketInstance) throw new Error('请传入 socketInstance')
 	}
 
 	async init() {
 		return new Promise((resolve, reject) => {
-			this.socketInstance = getSocketInstance(this.baseConfig?.socketConfig);
+			this.socketInstance = this.baseConfig?.socketInstance;
 			this.peerInstance = new PeerConnection();
 			this.eventEmitter = getEventEmitter();
 			this.bindSocketEvents();
 			this.bindPeerEvents();
-			this.socketInstance.on('error', e => {
+			this.socketInstance?.on(SocketListenEnum.ERROR, e => {
 				reject(e);
 			})
 
-			this.socketInstance.on(SocketEventsEnum.CONNECTION, (
+			this.socketInstance?.on(SocketListenEnum.CONNECTION, (
 				connectionInfo: IConnectionInfo
 			) => {
-				this.id = connectionInfo.id;
-				logger.log(`connected, my id is ${this.id}`);
+				this.socketInstance.id = connectionInfo.id;
+				logger.log(`connected, my id is ${this.socketInstance.id}`);
 				resolve(true);
 			})
 		})
 	}
 
 	async call(targetId: string) {
-		logger.log(`start call ${targetId}, my id is ${this.id}`);
+		logger.log(`start call ${targetId}, my id is ${this.socketInstance.id}`);
     // 创建 offer
 		const offer = await this.peerInstance.createOffer(RTC_OFFER_OPTION);
 		// 设置本地 offer 描述
 		await this.peerInstance.setLocalDescription(offer);
 		this.currentConnectTargetId = targetId;
-		this.socketInstance.emit(SocketEventsEnum.SET_OFFER_DESCRIPTION, {
+		this.socketInstance?.emit(SocketEmitEnum.SET_OFFER_DESCRIPTION, {
 			offer,
-			fromId: this.id,
+			fromId: this.socketInstance.id,
 			targetId: this.currentConnectTargetId
 		});
 	}
 
 	bindSocketEvents() {
 		// 接收并到 answer 消息设置到本地 peer desc
-		this.socketInstance.on(
-			SocketEventsEnum.SET_ANSWER_DESCRIPTION,
+		this.socketInstance?.on(
+			SocketListenEnum.SET_ANSWER_DESCRIPTION,
 			async (answerInfo: string) => {
 				const { answer } = JSON.parse(answerInfo) as unknown as IAnswerInfo;
 				logger.log(`设置 answer`);
@@ -78,8 +83,8 @@ export class P2PConnection {
 		);
 
 		// 接收并设置 iceCandidate
-		this.socketInstance.on(
-			SocketEventsEnum.SET_ICE_CANDIDATE,
+		this.socketInstance?.on(
+			SocketListenEnum.SET_ICE_CANDIDATE,
 			async (candidateInfo: string) => {
 				const { candidate } = JSON.parse(candidateInfo) as ICandidateInfo
 				logger.log(`设置 iceCandidate`);
@@ -88,8 +93,8 @@ export class P2PConnection {
 		);
 
 		// 接收并设置远端连接发送过来的 offer
-		this.socketInstance.on(
-			SocketEventsEnum.SET_OFFER_DESCRIPTION,
+		this.socketInstance?.on(
+			SocketListenEnum.SET_OFFER_DESCRIPTION,
 			async (offerInfo: string) => {
 				const { offer, fromId } = JSON.parse(offerInfo) as unknown as IOfferInfo;
 				this.currentConnectTargetId = fromId;
@@ -117,10 +122,10 @@ export class P2PConnection {
       if (e.candidate) {
         logger.log(`拿到 candidate`);
         this.socketInstance.emit(
-          SocketEventsEnum.SET_ICE_CANDIDATE,
+          SocketEmitEnum.SET_ICE_CANDIDATE,
           <ICandidateInfo>{
 						candidate: e.candidate,
-						fromId: this.id,
+						fromId: this.socketInstance.id,
 						targetId: this.currentConnectTargetId
 					}
         );
@@ -133,20 +138,20 @@ export class P2PConnection {
 		await this.peerInstance.setLocalDescription(answer);
 
 		logger.log(`创建 answer 并推送`);
-		this.socketInstance.emit(SocketEventsEnum.SET_ANSWER_DESCRIPTION, <IAnswerInfo>{
+		this.socketInstance.emit(SocketEmitEnum.SET_ANSWER_DESCRIPTION, <IAnswerInfo>{
 			answer,
-			fromId: this.id,
+			fromId: this.socketInstance.id,
 			targetId: this.currentConnectTargetId
 		});
 	}
 
-	on(eventType: keyof typeof P2PSocketEventsType, listener: IEmiterCallback) {
+	on(eventType: keyof typeof P2PSocketEventsType, listener: ICommonEventCallback) {
 		return this.eventEmitter.on(eventType, listener);
 	}
 }
 
 
-export const getP2PConnectionInstance = async (props?: IBaseConfig) => {
+export const getP2PConnectionInstance = async (props: IBaseConfig) => {
 	const instance = new P2PConnection(props);
 	await instance.init();
 	return instance;

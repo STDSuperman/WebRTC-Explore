@@ -7,7 +7,7 @@ export type ISocketConfig = Partial<ManagerOptions & SocketOptions>;
 const SOCKET_URL = `http://localhost:${SERVER_PORT}`;
 
 export const getSocketInstance = (
-  socketOptions: ISocketConfig
+  socketOptions?: ISocketConfig
 ) => {
   return SocketClient(SOCKET_URL, socketOptions);
 }

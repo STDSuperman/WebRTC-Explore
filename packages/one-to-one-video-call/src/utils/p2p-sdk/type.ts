@@ -1,4 +1,8 @@
-import { ISocketConfig } from '@/utils/socket-client'
+import {
+	SocketEmitEnum,
+	SocketListenEnum
+}  from 'p2p-types'
+
 export interface IPeerConnectionWithMediaStream {
 	RTCPeer: RTCPeerConnection;
 	mediaStream: MediaStream;
@@ -6,11 +10,17 @@ export interface IPeerConnectionWithMediaStream {
 
 export enum P2PSocketEventsType {
 	P2PConnection = "P2PConnection",
-  track = "track",
+  track = "track"
 }
 
-export type IEmiterCallback = (...args: unknown[]) => void;
+export type ICommonEventCallback = (...args: unknown[]) => void;
 
 export interface IBaseConfig {
-	socketConfig: ISocketConfig;
+	socketInstance: ISocketInstance;
+}
+
+export interface ISocketInstance {
+	on: (event: SocketListenEnum, listener: ICommonEventCallback) => void;
+	emit: (event: SocketEmitEnum, data: unknown) => void;
+	id: string;
 }

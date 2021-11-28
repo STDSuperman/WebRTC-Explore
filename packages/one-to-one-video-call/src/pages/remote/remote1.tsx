@@ -1,8 +1,8 @@
-import React from 'react'
 import './index.scss'
 import { useRef, useEffect, useState } from 'react'
 import { getP2PConnectionInstance, P2PSocketEventsType } from '@/utils/p2p-sdk'
 import { createAndAddStream } from '@/utils/helper'
+import { getSocketInstance } from '@/utils/socket-client'
 
 const Remote1 = () => {
   const videoRef = useRef(null);
@@ -10,7 +10,10 @@ const Remote1 = () => {
   const [p2pInstance, setP2pInstance] = useState(null);
 
   useEffect(() => {
-    getP2PConnectionInstance()
+    const socketInstance = getSocketInstance();
+    getP2PConnectionInstance({
+      socketInstance
+    })
       .then(p2pInstance => {
         setP2pInstance(p2pInstance)
         p2pInstance.on(P2PSocketEventsType.track, (e: RTCTrackEvent) => {
