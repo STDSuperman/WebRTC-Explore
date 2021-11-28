@@ -34,45 +34,46 @@ export class P2PSocketController {
 
   @OnWSMessage(SocketEventsEnum.SET_OFFER_DESCRIPTION)
   async gotOfferDesc(offerInfo: IOfferInfo) {
-    const targetSocket = this.findSocketById(offerInfo.targetId);
-    if (targetSocket) {
-      console.log(`current offer to ${targetSocket.id}`);
-      this.ctx
-        ?.to(targetSocket.id)
-        .emit(
-          SocketEventsEnum.SET_OFFER_DESCRIPTION,
-          JSON.stringify({ offer: offerInfo.offer, fromId: offerInfo.fromId })
-        );
-    }
+    return this.findAndSendMsg(
+      offerInfo.targetId,
+      SocketEventsEnum.SET_OFFER_DESCRIPTION,
+      { offer: offerInfo.offer, fromId: offerInfo.fromId }
+    );
   }
 
   @OnWSMessage(SocketEventsEnum.SET_ANSWER_DESCRIPTION)
   async gotAnswerDesc(answerInfo: IAnswerInfo) {
-    const targetSocket = this.findSocketById(answerInfo.targetId);
-    if (targetSocket) {
-      console.log(`current answer send to ${targetSocket.id}`);
-      this.ctx?.to(targetSocket.id).emit(
-        SocketEventsEnum.SET_ANSWER_DESCRIPTION,
-        JSON.stringify({
-          answer: answerInfo.answer,
-          fromId: answerInfo.fromId,
-        })
-      );
-    }
+    return this.findAndSendMsg(
+      answerInfo.targetId,
+      SocketEventsEnum.SET_ANSWER_DESCRIPTION,
+      {
+        answer: answerInfo.answer,
+        fromId: answerInfo.fromId,
+      }
+    );
   }
 
   @OnWSMessage(SocketEventsEnum.SET_ICE_CANDIDATE)
   async gotCandidate(candidate: ICandidateInfo) {
-    const targetSocket = this.findSocketById(candidate.targetId);
+    return this.findAndSendMsg(
+      candidate.targetId,
+      SocketEventsEnum.SET_ICE_CANDIDATE,
+      {
+        candidate: candidate.candidate,
+        fromId: candidate.fromId,
+      }
+    );
+  }
+
+  async findAndSendMsg(
+    targetId: string,
+    eventType: string,
+    data: unknown
+  ): Promise<void> {
+    const targetSocket = this.findSocketById(targetId);
     if (targetSocket) {
-      console.log(`current candidate send to ${targetSocket.id}`);
-      this.ctx?.to(targetSocket.id).emit(
-        SocketEventsEnum.SET_ICE_CANDIDATE,
-        JSON.stringify({
-          candidate: candidate.candidate,
-          fromId: candidate.fromId,
-        })
-      );
+      console.log(`send to ${targetSocket.id}`);
+      this.ctx?.to(targetSocket.id).emit(eventType, JSON.stringify(data));
     }
   }
 

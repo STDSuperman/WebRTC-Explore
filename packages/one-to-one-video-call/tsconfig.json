@@ -4,7 +4,7 @@
     "target": "ESNext",
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "inlineSourceMap": true,
@@ -14,13 +14,17 @@
     "skipLibCheck": false,
     "pretty": true,
     "declaration": true,
+    "jsx": "react-jsx",
     "typeRoots": [
       "./typings",
       "./node_modules/@types"
     ],
     "outDir": "dist",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "exclude": [
     "dist",

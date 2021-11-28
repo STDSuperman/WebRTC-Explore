@@ -36,7 +36,8 @@ export class P2PConnection {
 			this.socketInstance = getSocketInstance(this.baseConfig?.socketConfig);
 			this.peerInstance = new PeerConnection();
 			this.eventEmitter = getEventEmitter();
-			this.bindEvents();
+			this.bindSocketEvents();
+			this.bindPeerEvents();
 			this.socketInstance.on('error', e => {
 				reject(e);
 			})
@@ -51,7 +52,7 @@ export class P2PConnection {
 		})
 	}
 
-	async call(targetId) {
+	async call(targetId: string) {
 		logger.log(`start call ${targetId}, my id is ${this.id}`);
     // 创建 offer
 		const offer = await this.peerInstance.createOffer(RTC_OFFER_OPTION);
@@ -65,7 +66,7 @@ export class P2PConnection {
 		});
 	}
 
-	bindEvents() {
+	bindSocketEvents() {
 		// 接收并到 answer 消息设置到本地 peer desc
 		this.socketInstance.on(
 			SocketEventsEnum.SET_ANSWER_DESCRIPTION,
@@ -97,7 +98,9 @@ export class P2PConnection {
 				await this.handlerReplyAnswer();
 			}
 		);
+	}
 
+	bindPeerEvents() {
 		// 收到流消息
 		this.peerInstance.addEventListener("track", (e) => {
 			logger.log("拿到流消息")

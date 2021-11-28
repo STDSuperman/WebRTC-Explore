@@ -25,6 +25,7 @@
     "p2p-types": "0.0.1-beta.3",
     "socket.io-client": "^4.0.0",
     "ts-jest": "^26.2.0",
+    "tslib": "^2.3.1",
     "typescript": "^4.0.0"
   },
   "engines": {
