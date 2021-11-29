@@ -1,0 +1,23 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": [
+      "webworker",
+      "ES2015"
+    ],
+    "resolveJsonModule": true,
+    "moduleResolution": "Node",
+    "module": "commonjs",
+    "target": "es5",
+    "outDir": "dist",
+    "isolatedModules": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ],
+  "include": ["src"]
+}
