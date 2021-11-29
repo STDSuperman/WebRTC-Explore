@@ -53,7 +53,11 @@ const init = async () => {
     window.navigator.serviceWorker.register('./worker.js')
       .then(() => {
         fetch('/intercept/status').then(res => {
-          logger.info(`Intercept OK!`)
+          if (res.ok) {
+            logger.info(`Intercept OK!`)
+          } else {
+            logger.error(`Intercept failed!`)
+          }
         })
       })
       .catch((e) => {

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "lib": [
       "webworker",
-      "ES2015"
+      "ES2015",
+      "DOM"
     ],
     "moduleResolution": "Node",
     "module": "UMD",

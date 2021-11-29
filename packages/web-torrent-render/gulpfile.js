@@ -6,13 +6,7 @@ const babelify = require("babelify");
 const ts = require('gulp-typescript');
 const tsProject = ts.createProject('./tsconfig.json');
 const path = require('path');
-
-// gulp.task('typescript', function() {
-//   const tsResult = tsProject.src().pipe(tsProject());
-//   return tsResult.js.pipe(gulp.dest('dist/'));
-// });
-
-const entryFiles = ["src/index.ts", "src/worker.ts"];
+const server = require("browser-sync").create();
 
 const buildTsFile = filepath => {
   const parsedUrlInfo = path.parse(filepath);
@@ -36,15 +30,27 @@ const buildTsFile = filepath => {
   }
 }
 
+const buildAllTsFile = () => {
+  const entries = ["src/worker.ts", "src/index.ts"]
+  return gulp.series(entries.map(filepath => buildTsFile(filepath)))
+}
+
 gulp.task('copy', () => {
   return gulp
     .src('./public/*')
     .pipe(gulp.dest('dist'))
 })
 
+gulp.task('server', function() {
+  return server.init({
+    server: {
+      baseDir: './dist'
+    }
+  });
+});
 
 gulp.task("default", gulp.series(
-  buildTsFile("src/worker.ts"),
-  buildTsFile("src/index.ts"),
-  'copy'
+  buildAllTsFile(),
+  'copy',
+  'server'
 ));
