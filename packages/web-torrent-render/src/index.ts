@@ -2,8 +2,6 @@ import WebTorrent from 'webtorrent';
 import { TORRENT_PREFIX, INDEX_HTML_NAME, CACHE_NAME } from './utils/constants';
 import { logger } from './utils/logger';
 
-export {};
-
 const client = new WebTorrent();
 
 const render = (torrentHash: string) => {
@@ -55,7 +53,7 @@ const init = async () => {
     window.navigator.serviceWorker.register('./worker.js')
       .then(() => {
         fetch('/intercept/status').then(res => {
-          console.log(res);
+          logger.info(`Intercept OK!`)
         })
       })
       .catch((e) => {

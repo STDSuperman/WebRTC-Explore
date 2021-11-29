@@ -5,12 +5,11 @@
       "webworker",
       "ES2015"
     ],
-    "resolveJsonModule": true,
     "moduleResolution": "Node",
-    "module": "commonjs",
-    "target": "es5",
+    "module": "UMD",
+    "target": "ES5",
     "outDir": "dist",
-    "isolatedModules": false,
+    "isolatedModules": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true

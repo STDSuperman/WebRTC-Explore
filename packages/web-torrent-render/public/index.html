@@ -7,9 +7,11 @@
   <title>Document</title>
 </head>
 <body>
-  <script src='./dist/index.js'></script>
+  <script src='./index.js'></script>
   <script>
-    console.log(window)
+    window.p2p.init().then(() => {
+      window.p2p.render('7f614db89d027af229cf4dee8c8dface02b07da7');
+    })
   </script>
 </body>
 </html>

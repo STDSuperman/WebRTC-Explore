@@ -3,7 +3,6 @@ import { CACHE_NAME } from './utils/constants'
 
 // eslint-disable-next-line
 const sw = self as unknown as ServiceWorkerGlobalScope;
-export {};
 
 const clearCache = async (cacheName: string) => {
   const keys = await caches.keys();
@@ -32,13 +31,15 @@ sw.addEventListener('fetch', async event => {
 
   if (method.toUpperCase() !== 'GET' || request.indexOf(scope) !== 0) return;
 
-  const fetchPath = request.slice(scope.length);
+  const fetchPath = request.slice(scope?.length ?? 0);
   logger.info('Current fetch request is', fetchPath);
 
-  if (fetchPath === '/intercept/status') {
+  if (fetchPath.indexOf('intercept/status') !== -1) {
     event.respondWith(new Response('', { status: 200, statusText: 'OK' }));
   } else {
     const cacheResponse = await caches.match(fetchPath);
-    event.respondWith(cacheResponse ?? sw.fetch(event.request));
+    const response = cacheResponse ?? await sw.fetch(event.request);
+    console.log(event.request.url, response)
+    event.respondWith(response);
   }
 })
