@@ -7,8 +7,7 @@ const client = new WebTorrent();
 export const render = (torrentHash: string) => {
   const torrent = TORRENT_PREFIX + torrentHash;
   logger.info(`Start Downloading torrent ${torrent}...`);
-  console.log(client.add);
-  client.add(torrent, {}, renderTorrent);
+  client.add(torrent, renderTorrent);
 }
 
 
@@ -77,7 +76,7 @@ window.p2p = {
 
 const start = () => {
   init().then(() => {
-    render('7f614db89d027af229cf4dee8c8dface02b07da7');
+    render('b65ccbeca1391fe8c26b8baf0707a3672e5fadcd');
   })
 }
 
