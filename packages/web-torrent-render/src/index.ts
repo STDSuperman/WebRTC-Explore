@@ -1,18 +1,19 @@
-import WebTorrent from 'webtorrent';
+import WebTorrent from 'webtorrent/webtorrent.min.js';
 import { TORRENT_PREFIX, INDEX_HTML_NAME, CACHE_NAME } from './utils/constants';
 import { logger } from './utils/logger';
 
 const client = new WebTorrent();
 
-const render = (torrentHash: string) => {
+export const render = (torrentHash: string) => {
   const torrent = TORRENT_PREFIX + torrentHash;
   logger.info(`Start Downloading torrent ${torrent}...`);
-  client.add(torrent, renderTorrent);
+  console.log(client.add);
+  client.add(torrent, {}, renderTorrent);
 }
 
 
 const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
-  logger.info(`Torrent Downloaded!`);
+  logger.info(`Torrent Downloaded! TorrentInfo: ${torrentInfo}`);
   const files = torrentInfo.files;
   const cacheDB = await caches.open(CACHE_NAME);
   const indexHtmlFile = torrentInfo.files.find(file => {
@@ -48,7 +49,7 @@ const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile, db: Cac
   })
 }
 
-const init = async () => {
+export const init = async () => {
   if (window.navigator.serviceWorker) {
     window.navigator.serviceWorker.register('./worker.js')
       .then(() => {
@@ -73,3 +74,11 @@ window.p2p = {
   render,
   init
 }
+
+const start = () => {
+  init().then(() => {
+    render('7f614db89d027af229cf4dee8c8dface02b07da7');
+  })
+}
+
+start()

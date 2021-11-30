@@ -2,7 +2,7 @@ import { logger } from './utils/logger'
 import { CACHE_NAME } from './utils/constants'
 
 // eslint-disable-next-line
-const sw = self as unknown as ServiceWorkerGlobalScope;
+declare const self: ServiceWorkerGlobalScope;
 
 const clearCache = async (cacheName: string) => {
   const keys = await caches.keys();
@@ -13,20 +13,20 @@ const clearCache = async (cacheName: string) => {
   })
 }
 
-sw.addEventListener('install', async event => {
+self.addEventListener('install', async event => {
   logger.info('installing!')
-  await sw.skipWaiting();
+  await self.skipWaiting();
 })
 
-sw.addEventListener('activate', async event => {
+self.addEventListener('activate', async event => {
   await clearCache(CACHE_NAME);
-  await sw.clients.claim();
+  await self.clients.claim();
   logger.info('activated!')
 })
 
-sw.addEventListener('fetch', async event => {
+self.addEventListener('fetch', async event => {
   const request = event.request;
-  const scope = sw.registration.scope;
+  const scope = self.registration.scope;
   const method = event.request.method;
   const url = request.url;
 
@@ -35,11 +35,16 @@ sw.addEventListener('fetch', async event => {
   const fetchPath = url.slice(scope?.length ?? 0);
   logger.info('Current fetch request is', fetchPath);
 
-  if (fetchPath.indexOf('intercept/status') !== -1) {
+  if (fetchPath === '') {
+    event.respondWith(self.fetch('/index.html'));
+  } else if (fetchPath.indexOf('intercept/status') !== -1) {
     event.respondWith(new Response('', { status: 200, statusText: 'OK' }));
   } else {
-    const cacheResponse = caches.match(fetchPath);
-    const response = cacheResponse ?? sw.fetch(event.request);
-    event.respondWith(response);
+    const getInterceptResponse = async (): Promise<Response> => {
+      const cacheResponse = await caches.match(fetchPath);
+      const response = cacheResponse ?? self.fetch(event.request);
+      return response;
+    }
+    event.respondWith(getInterceptResponse());
   }
 })
