@@ -1,0 +1,17 @@
+{
+  "name": "torrent-tracker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index"
+  },
+  "dependencies": {
+    "@codesuperman/logger": "^1.0.0",
+    "bittorrent-tracker": "^9.18.3",
+    "chalk": "^5.0.0",
+    "consola": "^2.15.3"
+  }
+}

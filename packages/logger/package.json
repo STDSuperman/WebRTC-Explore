@@ -1,0 +1,18 @@
+{
+  "name": "@codesuperman/logger",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build",
+    "release": "release-it -- minor"
+  },
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "consola": "^2.15.3"
+  },
+  "devDependencies": {
+    "release-it": "^14.11.8"
+  }
+}

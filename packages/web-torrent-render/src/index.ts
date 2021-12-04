@@ -1,6 +1,6 @@
 import WebTorrent from 'webtorrent/webtorrent.min.js';
 import { TORRENT_PREFIX, INDEX_HTML_NAME, CACHE_NAME } from './utils/constants';
-import { logger } from './utils/logger';
+import { logger } from '@codesuperman/logger'
 
 const client = new WebTorrent();
 

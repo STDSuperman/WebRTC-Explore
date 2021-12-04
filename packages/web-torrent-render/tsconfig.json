@@ -10,7 +10,7 @@
     "module": "es6",
     "target": "ES5",
     "outDir": "dist",
-    "isolatedModules": true,
+    "isolatedModules": false,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
