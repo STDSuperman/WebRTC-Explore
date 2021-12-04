@@ -7,7 +7,7 @@
       "DOM"
     ],
     "moduleResolution": "Node",
-    "module": "es6",
+    "module": "CommonJS",
     "target": "ES5",
     "outDir": "dist",
     "isolatedModules": false,

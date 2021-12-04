@@ -1,13 +1,16 @@
-// @ts-ignore: 设置 .d.ts 无效
 import { Server } from 'bittorrent-tracker'
-import { logger } from '@codesuperman/logger'
+// import { logger } from '@codesuperman/logger'
+
+const logger = console;
+
+// const logger = loggerModule.logger;
 
 const app = new Server({
   udp: true, // enable udp server? [default=true]
   http: true, // enable http server? [default=true]
   ws: true, // enable websocket server? [default=true]
   stats: true, // enable web-based statistics? [default=true]
-  trustProxy: false // enable trusting x-forwarded-for header for remote IP [default=false]
+  trustProxy: true // enable trusting x-forwarded-for header for remote IP [default=false]
 })
 
 
@@ -26,8 +29,8 @@ app.on('listening', function () {
 
 
 
-app.on('start', function (addr: string) {
-  logger.log('got start message from ' + addr)
+app.on('start', function (infoHash: string) {
+  logger.log('got start message from ' + infoHash)
 })
 
 app.on('complete', function (addr: string) {
@@ -40,4 +43,4 @@ app.on('stop', function (addr: string) {
   logger.log(`stop: ${addr}`)
 })
 
-app.listen(5555, 'localhost');
+app.listen(8000, 'localhost');

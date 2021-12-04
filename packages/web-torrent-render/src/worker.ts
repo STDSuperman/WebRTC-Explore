@@ -1,4 +1,4 @@
-import { logger } from './utils/logger'
+import { logger } from '@codesuperman/logger'
 import { CACHE_NAME } from './utils/constants'
 
 // eslint-disable-next-line
