@@ -4,6 +4,8 @@ import { logger } from '@codesuperman/logger'
 import Tracker from 'bittorrent-tracker';
 import magnet from 'magnet-uri'
 
+console.log(`WebRTC Support: ${WebTorrent.WEBRTC_SUPPORT}`);
+
 function addTorrentEvents(torrent: WebTorrent) {
   torrent.on('warning', (err: Error) =>
       console.log('warning: ', err.message))
@@ -38,7 +40,8 @@ export const render = (torrentHash: string) => {
   const torrent = TORRENT_PREFIX + torrentHash;
   logger.info(`Start Downloading torrent ${torrent}...`);
 
-  const magnetURI = 'magnet:?xt=urn:btih:23aeb132a692c6a43387d79b966612f9ac79ed5e&dn=dist&tr=http%3A%2F%2Flocalhost%3A8000%2Fannounce&tr=udp%3A%2F%2F0.0.0.0%3A8000&tr=udp%3A%2F%2Flocalhost%3A8000&tr=ws%3A%2F%2Flocalhost%3A8000'
+  const magnetURI = 'magnet:?xt=urn:btih:ce1f55dc386646ac6894f67f855eac21fedcf663&dn=index.html&tr=http%3A%2F%2Flocalhost%3A8000%2Fannounce&tr=udp%3A%2F%2F0.0.0.0%3A8000&tr=udp%3A%2F%2Flocalhost%3A8000&tr=ws%3A%2F%2Flocalhost%3A8000'
+  // const magnetURI = 'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent'
   const parsedTorrent = magnet(magnetURI);
 
   console.log(parsedTorrent);
