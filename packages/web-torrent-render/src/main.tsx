@@ -2,9 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
 import App from './App'
-import { init, render } from './index';
+import { init } from './torrent-render';
 
-console.log(init, render)
+// init();
 
 ReactDOM.render(
   <React.StrictMode>

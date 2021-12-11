@@ -6,7 +6,7 @@ module.exports = {
   mode: 'development',
   entry: {
     main: './src/main.tsx',
-    index: './src/index.ts',
+    'torrent-render': './src/torrent-render.ts',
     worker: './src/worker.ts'
   },
   module: {
@@ -42,7 +42,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './index.html'
+      template: './index.html',
+      excludeChunks: ['worker']
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
