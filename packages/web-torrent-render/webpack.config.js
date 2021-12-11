@@ -5,6 +5,7 @@ const webpack = require('webpack')
 module.exports = {
   mode: 'development',
   entry: {
+    main: './src/main.tsx',
     index: './src/index.ts',
     worker: './src/worker.ts'
   },
@@ -15,6 +16,11 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css/,
+        use: ['style-loader', 'css-loader'],
+        exclude: /node_modules/
+      }
     ],
   },
   resolve: {
@@ -35,7 +41,9 @@ module.exports = {
     publicPath: '/'
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: './index.html'
+    }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
       process: 'process/browser'

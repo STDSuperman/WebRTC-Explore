@@ -1,9 +1,8 @@
 import WebTorrent from 'webtorrent/webtorrent.min.js';
 import { TORRENT_PREFIX, INDEX_HTML_NAME, CACHE_NAME } from './utils/constants';
+import { logger } from '@codesuperman/logger'
 import Tracker from 'bittorrent-tracker';
 import magnet from 'magnet-uri'
-
-const logger = console;
 
 console.log(`WebRTC Support: ${WebTorrent.WEBRTC_SUPPORT}`);
 
@@ -123,3 +122,16 @@ export const init = async () => {
     logger.error(`Current environment does not support service worker!`)
   }
 }
+
+window.p2p = {
+  render,
+  init
+}
+
+const start = () => {
+  init().then(() => {
+    render('23aeb132a692c6a43387d79b966612f9ac79ed5e&dn=dist&tr=http%3A%2F%2Flocalhost%3A8000%2Fannounce&tr=udp%3A%2F%2F0.0.0.0%3A8000&tr=udp%3A%2F%2Flocalhost%3A8000&tr=ws%3A%2F%2Flocalhost%3A8000');
+  })
+}
+
+start()
