@@ -39,13 +39,20 @@ const opts = {
   announce: myAnnounce
 }
 
-client.seed('./dist', opts, torrent => {
+client.seed('./dist/index.html', opts, torrent => {
   // console.log(torrent, torrent.magnetURI);
   torrent.on('upload', function (bytes) {
 		console.log('just uploaded: ' + bytes)
 		console.log('total uploaded: ' + torrent.uploaded);
 		console.log('upload speed: ' + torrent.uploadSpeed)
 	})
+
+  console.log('client.seed done', {
+    magnetURI: torrent.magnetURI,
+    ready: torrent.ready,
+    paused: torrent.paused,
+    done: torrent.done,
+  });
 
   const client2 = new WebTorrent();
   client2.add(torrent.magnetURI, (trr) => {

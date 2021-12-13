@@ -8,32 +8,33 @@ const logger = console;
 console.log(`WebRTC Support: ${WebTorrent.WEBRTC_SUPPORT}`);
 
 function addTorrentEvents(torrent: WebTorrent) {
+  logger.log('bind torrent listener')
   torrent.on('warning', (err: Error) =>
-      console.log('warning: ', err.message))
+      logger.log('warning: ', err.message))
   torrent.on('error', (err: Error) =>
-      console.log('error: ', err.message))
+      logger.log('error: ', err.message))
   torrent.on('infoHash', () =>
-      console.log('infohash: ', torrent.infoHash))
+      logger.log('infohash: ', torrent.infoHash))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
   torrent.on('download', function (bytes) {
-    console.log('just downloaded: ' + bytes)
-    console.log('total downloaded: ' + torrent.downloaded)
-    console.log('download speed: ' + torrent.downloadSpeed)
-    console.log('progress: ' + torrent.progress)
+    logger.log('just downloaded: ' + bytes)
+    logger.log('total downloaded: ' + torrent.downloaded)
+    logger.log('download speed: ' + torrent.downloadSpeed)
+    logger.log('progress: ' + torrent.progress)
   })
 
   function torrentMetadata () {
-      console.log('metadata received')
+      logger.log('metadata received')
   }
 
   function torrentReady () {
-      console.log('Torrent ready to download')
+      logger.log('Torrent ready to download')
   }
 
   function torrentDone () {
-      console.log('Torrent downloaded')
+      logger.log('Torrent downloaded')
   }
 }
 
@@ -47,7 +48,9 @@ export const render = (magnetURI: string) => {
 
   console.log(parsedTorrent);
   const client = new WebTorrent();
-  const torrentInstance = client.add(magnetURI, renderTorrent);
+  const torrentInstance = client.add(magnetURI, {
+    path: './'
+  }, renderTorrent);
 
   addTorrentEvents(torrentInstance)
 
@@ -62,7 +65,6 @@ export const render = (magnetURI: string) => {
     console.log(data)
   })
   client1.scrape();
-  console.log(client1);
 }
 
 const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
