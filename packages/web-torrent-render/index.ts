@@ -1,4 +1,4 @@
-import WebTorrent from "webtorrent";
+import WebTorrent from "webtorrent-hybrid";
 import createTorrent from 'create-torrent';
 import parseTorrent from 'parse-torrent';
 import fs from 'fs';
