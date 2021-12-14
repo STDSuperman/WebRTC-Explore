@@ -44,8 +44,7 @@
     "torrent-discovery": "^9.4.6",
     "tsify": "^5.0.4",
     "vinyl-source-stream": "^2.0.0",
-    "webtorrent": "^1.5.8",
-    "webtorrent-hybrid": "^5.0.1"
+    "webtorrent": "^1.5.8"
   },
   "browserify": {
     "transform": [
