@@ -1,5 +1,6 @@
 import { logger } from '@codesuperman/logger'
-import { CACHE_NAME } from './utils/constants'
+import { CACHE_NAME, staticPrefix } from './utils/constants'
+import localforage from 'localforage';
 
 // eslint-disable-next-line
 declare const self: ServiceWorkerGlobalScope;
@@ -40,11 +41,13 @@ self.addEventListener('fetch', async event => {
   } else if (fetchPath.indexOf('intercept/status') !== -1) {
     event.respondWith(new Response('', { status: 200, statusText: 'OK' }));
   } else {
-    const getInterceptResponse = async (): Promise<Response> => {
-      const cacheResponse = await caches.match(fetchPath);
-      const response = cacheResponse ?? self.fetch(event.request);
-      return response;
-    }
-    event.respondWith(getInterceptResponse());
+    logger.info(`current storage cache keys: ${await localforage.keys()}`);
+    const currentFileBlob: string = await localforage.getItem(`${staticPrefix}/${fetchPath}`)
+    logger.info(`current request blobUrl: ${currentFileBlob}`)
+    console.log('xxxx')
+    const response = await fetch(currentFileBlob);
+    console.log(response)
+    event.respondWith(new Response(response.body, { status: response.status, statusText: response.statusText}))
+    // event.respondWith(response)
   }
 })

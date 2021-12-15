@@ -2,8 +2,10 @@ import WebTorrent from 'webtorrent/webtorrent.min.js';
 import { TORRENT_PREFIX, INDEX_HTML_NAME, CACHE_NAME } from './utils/constants';
 import Tracker from 'bittorrent-tracker';
 import magnet from 'magnet-uri'
+import localforage from 'localforage';
+import { logger } from '@codesuperman/logger'
 
-const logger = console;
+// const logger = console;
 
 console.log(`WebRTC Support: ${WebTorrent.WEBRTC_SUPPORT}`);
 
@@ -46,13 +48,12 @@ export const render = (magnetURI: string) => {
   // const magnetURI = 'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent'
   const parsedTorrent = magnet(magnetURI);
 
-  console.log(parsedTorrent);
   const client = new WebTorrent();
   const torrentInstance = client.add(magnetURI, {
     path: './'
   }, renderTorrent);
 
-  addTorrentEvents(torrentInstance)
+  // addTorrentEvents(torrentInstance)
 
   const client1 = new Tracker({
     infoHash: parsedTorrent.infoHash,
@@ -73,36 +74,61 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
   const files = torrentInfo.files;
   const cacheDB = await caches.open(CACHE_NAME);
   const indexHtmlFile = torrentInfo.files.find(file => {
-    return file.path === INDEX_HTML_NAME
+    return file.name === INDEX_HTML_NAME
   });
   let index = files.length;
+  logger.info(`file length: ${index}`);
   while (index-- > 0) {
     const file = files[index];
-    await promisifySetTorrentResponse(file, cacheDB);
+    if (file.name === INDEX_HTML_NAME) continue;
+    logger.info(`current handle file: ${file.name}`);
+    try {
+      await promisifySetTorrentResponse(file, cacheDB);
+      logger.info(`handler ${file.name} is complete`)
+    } catch (error) {
+      logger.error(`handle  ${file.name} error: ${error}`);
+    }
   }
-
+  logger.log(`入口文件： ${indexHtmlFile.name}`)
   indexHtmlFile.getBuffer((err, buffer) => {
     if (err) {
       logger.error(err);
       return;
     }
-    document.body.innerHTML = buffer.toString();
+    logger.log(`index.html: ${buffer.toString()}`)
+    document.body.innerHTML = buffer.toString()
   })
 }
 
 const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile, db: Cache) => {
   return new Promise((resolve, reject) => {
+    console.log(file)
+    file.getBlobURL((e, v) => console.log(v))
     file.getBlobURL((e: Error, blobUrl: string) => {
       if (e) {
         logger.error(`获取 fileGlobUrl 异常：` + (e?.message ?? `未知异常)`));
+        reject(e);
         return null;
       }
-      logger.info(`Add ${file.path} to cache.`)
-      db.add(blobUrl)
-        .then((data) => resolve(data))
+      logger.info(`Add ${file.path} to cache.`);
+      const checkStatus = checkBlobUrlFetch(blobUrl);
+      if (!checkStatus) reject(new Error(`${file.path} blobUrl 读取失败`));
+      localforage.setItem(file.path, blobUrl)
+        .then(() => resolve(blobUrl))
         .catch(e => reject(e));
+      // db.add(blobUrl)
+      //   .then((data) => {
+      //     console.log(data);
+      //     resolve(data)
+      //   })
+      //   .catch(e => reject(e));
     });
   })
+}
+
+export const checkBlobUrlFetch = async (blobUrl: string) => {
+  const res = await self.fetch(blobUrl)
+  return res.status === 200
 }
 
 export const init = async () => {
