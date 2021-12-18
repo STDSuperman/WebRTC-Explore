@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import './App.css'
-import { render } from './torrent-render';
+import { render, init } from './torrent-render';
 
-const defaultMagnetURL = 'magnet:?xt=urn:btih:3497c7f71e8542258d7e81cd428e08e16888dfd8&dn=dist&tr=http%3A%2F%2Flocalhost%3A8000%2Fannounce&tr=udp%3A%2F%2F0.0.0.0%3A8000&tr=udp%3A%2F%2Flocalhost%3A8000&tr=ws%3A%2F%2Flocalhost%3A8000';
+const defaultMagnetURL = 'magnet:?xt=urn:btih:f537afe28647f397760237be9d5d595ce914287d&dn=dist&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337';
 
 function App() {
   const [torrentMagnetURL, setTorrentMagnetURL] = useState(defaultMagnetURL);
@@ -14,6 +14,7 @@ function App() {
         onChange={e => setTorrentMagnetURL(e.target.value)}
       ></input>
       <button type="button" onClick={() => render(torrentMagnetURL)}>开始抓取</button>
+      <button type="button" onClick={() => init()}>测试拦截</button>
     </div>
   )
 }

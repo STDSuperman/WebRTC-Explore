@@ -72,7 +72,6 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
   console.log(torrentInfo);
   logger.info(`Torrent Downloaded! TorrentInfo: ${torrentInfo}`);
   const files = torrentInfo.files;
-  const cacheDB = await caches.open(CACHE_NAME);
   const indexHtmlFile = torrentInfo.files.find(file => {
     return file.name === INDEX_HTML_NAME
   });
@@ -83,7 +82,7 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
     if (file.name === INDEX_HTML_NAME) continue;
     logger.info(`current handle file: ${file.name}`);
     try {
-      await promisifySetTorrentResponse(file, cacheDB);
+      await promisifySetTorrentResponse(file);
       logger.info(`handler ${file.name} is complete`)
     } catch (error) {
       logger.error(`handle  ${file.name} error: ${error}`);
@@ -100,18 +99,17 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
   })
 }
 
-const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile, db: Cache) => {
+const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile) => {
   return new Promise((resolve, reject) => {
-    console.log(file)
     file.getBlobURL((e, v) => console.log(v))
-    file.getBlobURL((e: Error, blobUrl: string) => {
+    file.getBlobURL(async (e: Error, blobUrl: string) => {
       if (e) {
         logger.error(`获取 fileGlobUrl 异常：` + (e?.message ?? `未知异常)`));
         reject(e);
         return null;
       }
       logger.info(`Add ${file.path} to cache.`);
-      const checkStatus = checkBlobUrlFetch(blobUrl);
+      const checkStatus = await checkBlobUrlFetch(blobUrl, file.path);
       if (!checkStatus) reject(new Error(`${file.path} blobUrl 读取失败`));
       localforage.setItem(file.path, blobUrl)
         .then(() => resolve(blobUrl))
@@ -126,22 +124,24 @@ const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile, db: Cac
   })
 }
 
-export const checkBlobUrlFetch = async (blobUrl: string) => {
+export const checkBlobUrlFetch = async (blobUrl: string, reqPath: string) => {
+  const cacheDB = await caches.open(CACHE_NAME);
   const res = await self.fetch(blobUrl)
+  cacheDB.put(reqPath, res.clone());
   return res.status === 200
 }
 
 export const init = async () => {
   if (window.navigator.serviceWorker) {
     window.navigator.serviceWorker.register('./worker.js')
-      .then(() => {
-        fetch('/intercept/status').then(res => {
-          if (res.ok) {
-            logger.info(`Intercept OK!`)
-          } else {
-            logger.error(`Intercept failed!`)
-          }
-        })
+      .then((res) => {
+        // fetch('/intercept/status').then(res => {
+        //   if (res.ok) {
+        //     logger.info(`Intercept OK!`)
+        //   } else {
+        //     logger.error(`Intercept failed!`)
+        //   }
+        verifyRouter((e) => console.log('verifyRouter ok', e));
       })
       .catch((e) => {
         logger.error(`Register service worker failed!`, e.message)
@@ -149,4 +149,17 @@ export const init = async () => {
   } else {
     logger.error(`Current environment does not support service worker!`)
   }
+}
+
+function verifyRouter (cb) {
+  console.log("冲")
+  var request = new window.XMLHttpRequest()
+  request.addEventListener('load', function verifyRouterOnLoad () {
+    if (this.status !== 234 || this.statusText !== 'intercepting') {
+      cb(new Error('Service Worker not intercepting http requests, perhaps not properly registered?'))
+    }
+    cb()
+  })
+  request.open('GET', './intercept/status')
+  request.send()
 }
