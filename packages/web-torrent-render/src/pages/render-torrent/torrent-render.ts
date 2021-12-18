@@ -1,5 +1,5 @@
 import WebTorrent from 'webtorrent/webtorrent.min.js';
-import { TORRENT_PREFIX, INDEX_HTML_NAME, CACHE_NAME } from './utils/constants';
+import { localForageStorageKey, INDEX_HTML_NAME, CACHE_NAME } from '../../utils/constants';
 import Tracker from 'bittorrent-tracker';
 import magnet from 'magnet-uri'
 import localforage from 'localforage';
@@ -77,26 +77,40 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
   });
   let index = files.length;
   logger.info(`file length: ${index}`);
+  const tempCacheObj = {};
+
   while (index-- > 0) {
     const file = files[index];
     if (file.name === INDEX_HTML_NAME) continue;
     logger.info(`current handle file: ${file.name}`);
     try {
-      await promisifySetTorrentResponse(file);
+      const fileGlobUrl = await promisifySetTorrentResponse(file);
+      tempCacheObj[file.path] = fileGlobUrl;
       logger.info(`handler ${file.name} is complete`)
     } catch (error) {
       logger.error(`handle  ${file.name} error: ${error}`);
     }
   }
-  logger.log(`入口文件： ${indexHtmlFile.name}`)
-  indexHtmlFile.getBuffer((err, buffer) => {
-    if (err) {
-      logger.error(err);
-      return;
-    }
-    logger.log(`index.html: ${buffer.toString()}`)
-    document.body.innerHTML = buffer.toString()
-  })
+
+  // 清理缓存
+  await localforage.clear()
+  // 存入缓存
+  await localforage.setItem(localForageStorageKey, tempCacheObj);
+  logger.info(`blobUrl 存入缓存完毕`)
+
+  if (!indexHtmlFile) {
+    logger.error(`can't found index.html`)
+  } else {
+    logger.log(`入口文件： ${indexHtmlFile?.name}`)
+    indexHtmlFile?.getBuffer((err, buffer) => {
+      if (err) {
+        logger.error(err);
+        return;
+      }
+      logger.log(`index.html: ${buffer.toString()}`)
+      document.body.innerHTML = buffer.toString()
+    })
+  }
 }
 
 const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile) => {
@@ -109,11 +123,10 @@ const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile) => {
         return null;
       }
       logger.info(`Add ${file.path} to cache.`);
-      const checkStatus = await checkBlobUrlFetch(blobUrl, file.path);
-      if (!checkStatus) reject(new Error(`${file.path} blobUrl 读取失败`));
-      localforage.setItem(file.path, blobUrl)
-        .then(() => resolve(blobUrl))
-        .catch(e => reject(e));
+      resolve(blobUrl);
+
+      // const checkStatus = await checkBlobUrlFetch(blobUrl, file.path);
+      // if (!checkStatus) reject(new Error(`${file.path} blobUrl 读取失败`));
       // db.add(blobUrl)
       //   .then((data) => {
       //     console.log(data);

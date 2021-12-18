@@ -1,5 +1,5 @@
 import { logger } from '@codesuperman/logger'
-import { CACHE_NAME, staticPrefix } from './utils/constants'
+import { CACHE_NAME, staticPrefix, localForageStorageKey } from './utils/constants'
 import localforage from 'localforage';
 
 // eslint-disable-next-line
@@ -44,7 +44,9 @@ self.addEventListener('fetch', async function (event) {
 })
 
 async function handleFetch(fetchUrl: string, event): Promise<Response> {
-  const currentFileBlob: string = await localforage.getItem(`${staticPrefix}/${fetchUrl}`)
+  const filepath2BlobUrlObj = await localforage.getItem(localForageStorageKey);
+  console.log(filepath2BlobUrlObj)
+  const currentFileBlob: string = filepath2BlobUrlObj[`${staticPrefix}/${fetchUrl}`]
   // logger.info(`current storage cache keys: ${await localforage.keys()}`);
   logger.info(`current request blobUrl: ${currentFileBlob}`, `${staticPrefix}/${fetchUrl}`)
 

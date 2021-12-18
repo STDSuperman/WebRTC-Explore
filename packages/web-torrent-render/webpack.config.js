@@ -6,7 +6,6 @@ module.exports = {
   mode: 'development',
   entry: {
     main: './src/main.tsx',
-    'torrent-render': './src/torrent-render.ts',
     worker: './src/worker.ts'
   },
   module: {
@@ -18,8 +17,7 @@ module.exports = {
       },
       {
         test: /\.css/,
-        use: ['style-loader', 'css-loader'],
-        exclude: /node_modules/
+        use: ['style-loader', 'css-loader']
       }
     ],
   },
