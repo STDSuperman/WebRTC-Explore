@@ -1235,10 +1235,10 @@ once@^1.3.0:
   dependencies:
     wrappy "1"
 
-p2p-types@0.0.1-beta.4:
-  version "0.0.1-beta.4"
-  resolved "https://registry.npmjs.org/p2p-types/-/p2p-types-0.0.1-beta.4.tgz#aec36b13f7f82a28df0372b1ba3b16f74514db43"
-  integrity sha512-fdrE1IHMjyeu/DxKqsil9xsdKVISKAm/Qb+abMcq2yzkfYizpPQeoOm64a2OqE9b+5MGDp/FCzevlZ26uUndyQ==
+p2p-types@^0.0.1-beta.6:
+  version "0.0.1-beta.6"
+  resolved "https://registry.npmjs.org/p2p-types/-/p2p-types-0.0.1-beta.6.tgz#6cef4a87607ebab6369122ecd6402446e0b916ae"
+  integrity sha512-ctn8QodvZ/dHoXRNj9rN6FX3ys3sDB3uIwH+yRhQBZKC7JHQOG8/6Rt/BKcTzmJ1IL8TcfbVkNiq6WNW2fjMtg==
   dependencies:
     tslib "^2.3.1"
 
