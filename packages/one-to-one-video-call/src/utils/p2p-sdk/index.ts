@@ -17,6 +17,10 @@ import {
 	IAnswerInfo
 }  from 'p2p-types'
 
+import * as test from 'p2p-types'
+
+console.log(test)
+
 export * from './type'
 
 export class P2PConnection {
