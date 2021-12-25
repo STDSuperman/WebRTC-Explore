@@ -9,15 +9,15 @@
 //   "wss://tracker.openwebtorrent.com"
 // ]
 
-// const myAnnounce = [
-//   "http://localhost:8000/announce",
-//   "udp://0.0.0.0:8000",
-//   "udp://localhost:8000",
-//   "ws://localhost:8000"
-// ]
+const myAnnounce = [
+  "http://localhost:8000/announce",
+  "udp://0.0.0.0:8000",
+  "udp://localhost:8000",
+  "ws://localhost:8000"
+]
 
 // const trackers = ['wss://tracker.btorrent.xyz', 'wss://tracker.openwebtorrent.com']
-const trackers = undefined;
+const trackers = myAnnounce;
 
 export const rtcConfig = {
   'iceServers': [
@@ -39,11 +39,15 @@ export const rtcConfig = {
   ]
 }
 
+export const maxWebConns = 10000;
+
 export const torrentOpts = {
-  announce: trackers
+  announce: trackers,
+  maxWebConns
 }
 
 export const trackerOpts = {
   announce: trackers,
-  rtcConfig: rtcConfig
+  rtcConfig: rtcConfig,
+  maxWebConns
 }

@@ -33,6 +33,9 @@ module.exports = {
       https: false,
       http: false,
       crypto: false
+    },
+    alias: {
+      '@': path.resolve(__dirname, './src'),
     }
   },
   output: {

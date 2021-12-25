@@ -4,7 +4,7 @@ import dragDrop from 'drag-drop';
 import { trackerOpts, torrentOpts } from '../../utils/config'
 import './index.less'
 import prettierBytes from 'prettier-bytes'
-import SeedStatistic from './seed-statistic';
+import SeedStatistic, { ISeedInfo } from './seed-statistic';
 import EmptyComponent from './empty'
 
 export type ITorrentInfo = WebTorrent.Torrent
@@ -16,14 +16,6 @@ const client = new WebTorrent({
 export const seedFiles = (files) => {
   return new Promise((resolve) => {
     client.seed(files, torrentOpts, torrent => {
-      // console.log(torrent, torrent.magnetURI);
-      torrent.on('upload', function (bytes) {
-        console.log('just uploaded: ' + bytes)
-        console.log('total uploaded: ' + torrent.uploaded);
-        console.log('upload speed: ' + prettierBytes(torrent.uploadSpeed) + '/s')
-      })
-
-      const progress = (100 * torrent.progress).toFixed(1)
       console.log('client.seed done', {
         magnetURI: torrent.magnetURI,
         ready: torrent.ready,
@@ -37,18 +29,33 @@ export const seedFiles = (files) => {
 
 const SeedFiles: React.FC = () => {
   const [torrentInfo, setTorrentInfo] = useState<any>({})
+  const [seedInfo, setSeedInfo] = useState<ISeedInfo>({
+    uploadSpeed: '0 KB/s',
+    uploadedByte: '0 KB'
+  })
   useEffect(() => {
-    dragDrop('body', seedFiles)
-      .then(torrent => {
-        setTorrentInfo(torrent)
-      })
+    dragDrop('body', files => {
+      seedFiles(files)
+        .then((torrent: any) => {
+          torrent.on('upload', function () {
+            setSeedInfo({
+              uploadedByte: prettierBytes(torrent.uploaded),
+              uploadSpeed: prettierBytes(torrent.uploadSpeed) + '/s'
+            })
+          })
+          setTorrentInfo(torrent)
+        });
+    })
   }, [])
 
   return (
     <div className="seed-file-container">
       {
         torrentInfo.magnetURI
-        ? <SeedStatistic torrentInfo={torrentInfo}/>
+        ? <SeedStatistic
+            torrentInfo={torrentInfo}
+            seedInfo={seedInfo}
+          />
         : <EmptyComponent />
       }
     </div>

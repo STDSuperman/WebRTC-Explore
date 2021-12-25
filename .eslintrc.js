@@ -20,6 +20,9 @@ module.exports = {
     'no-unused-vars': [
       1,
       { varsIgnorePattern: '.*', args: 'none' }
+    ],
+    'no-async-promise-executor': [
+      1
     ]
   },
   overrides: []
