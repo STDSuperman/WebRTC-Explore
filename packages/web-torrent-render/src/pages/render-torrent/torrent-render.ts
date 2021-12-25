@@ -50,22 +50,23 @@ export const render = (magnetURI: string) => {
 
   const client = new WebTorrent();
   const torrentInstance = client.add(magnetURI, {
-    path: './'
+    path: './pages/0b0cd0'
   }, renderTorrent);
 
   // addTorrentEvents(torrentInstance)
+  console.log(torrentInstance)
 
-  const client1 = new Tracker({
-    infoHash: parsedTorrent.infoHash,
-    announce: parsedTorrent.announce,
-    peerId: new Buffer('01234567890123456789'),
-    port: 6881
-  });
+  // const client1 = new Tracker({
+  //   infoHash: parsedTorrent.infoHash,
+  //   announce: parsedTorrent.announce,
+  //   peerId: new Buffer('01234567890123456789'),
+  //   port: 6881
+  // });
 
-  client1.on('scrape', function (data) {
-    console.log(data)
-  })
-  client1.scrape();
+  // client1.on('scrape', function (data) {
+  //   console.log(data)
+  // })
+  // client1.scrape();
 }
 
 const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
@@ -78,6 +79,7 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
   let index = files.length;
   logger.info(`file length: ${index}`);
   const tempCacheObj = {};
+  console.log(files);
 
   while (index-- > 0) {
     const file = files[index];
