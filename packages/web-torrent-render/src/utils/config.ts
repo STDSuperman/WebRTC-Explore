@@ -17,7 +17,8 @@ const myAnnounce = [
 ]
 
 // const trackers = ['wss://tracker.btorrent.xyz', 'wss://tracker.openwebtorrent.com']
-const trackers = myAnnounce;
+// const trackers = myAnnounce;
+const trackers = undefined;
 
 export const rtcConfig = {
   'iceServers': [

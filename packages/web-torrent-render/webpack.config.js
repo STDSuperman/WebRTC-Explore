@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
+const { CleanWebpackPlugin  } = require('clean-webpack-plugin')
 
 module.exports = {
   mode: 'development',
@@ -55,6 +56,7 @@ module.exports = {
       process: 'process/browser'
     }),
     new webpack.HotModuleReplacementPlugin(),
+    new CleanWebpackPlugin()
   ],
   devServer: {
     open: false,
