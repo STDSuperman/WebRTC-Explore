@@ -10,7 +10,7 @@ declare const self: ServiceWorkerGlobalScope;
 const emitter = mitt()
 const blobURLEventPrefix = 'getBlobURL-';
 let globalReqPool = [];
-const concurrentReqLimit = 10;
+const concurrentReqLimit = -1; // -1 表示不限制
 let inProgressTaskNum = 0;
 
 
@@ -133,11 +133,18 @@ const checkPageClientIsExist = async (pageClientId: string) => {
     logger.info('清空任务队列')
     globalReqPool = [];
   }
-  return isVisible;
+  return !!targetClient;
 }
 
 const scheduleNext = async () => {
-  if (globalReqPool.length > 0 && inProgressTaskNum < concurrentReqLimit) {
+  if (
+    globalReqPool.length > 0
+    && (
+      (concurrentReqLimit === -1)
+      ||
+      (inProgressTaskNum < concurrentReqLimit)
+    )
+  ) {
     const task = globalReqPool.shift();
     task();
     inProgressTaskNum++;

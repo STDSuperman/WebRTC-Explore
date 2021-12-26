@@ -25,7 +25,7 @@ export default function () {
         message.success('注册 ServiceWorker 成功')
       })
       .catch(msg => {
-        message.error(msg)
+        console.error(msg)
       })
   }
 
