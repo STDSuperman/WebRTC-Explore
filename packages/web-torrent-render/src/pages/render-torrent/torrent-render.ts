@@ -5,6 +5,7 @@ import localforage from 'localforage';
 import { logger } from '@codesuperman/logger'
 import { cacheInstance } from '@/utils/cache';
 import { promisifyFileGetBlob } from '@/utils'
+import { WorkerEventType, LOCAL_TORRENT_FILE_KEYS } from '@/utils/constants';
 
 // const logger = console;
 
@@ -132,21 +133,24 @@ const saveTorrentFileContext = async (torrentInfo: WebTorrent.torrentInfo) => {
   const files = torrentInfo.files;
   let index = files.length;
   logger.info(`file length: ${index}`);
-  const tempCacheObj = {};
+  const globalCacheObj = {};
+  const localFileKeyObj = {};
 
   while (index-- > 0) {
     const file = files[index];
     if (file.name === INDEX_HTML_NAME) continue;
     logger.info(`current handle file: ${file.name}`);
     try {
-      tempCacheObj[file.path] = file;
+      globalCacheObj[file.path] = file;
+      localFileKeyObj[file.path] = true;
       logger.info(`handler ${file.name} is complete`)
     } catch (error) {
       logger.error(`handle  ${file.name} error: ${error}`);
     }
   }
   // 存入全局缓存
-  cacheInstance.set('globalTorrentFilesCache', tempCacheObj);
+  cacheInstance.set('globalTorrentFilesCache', globalCacheObj);
+  localforage.setItem(LOCAL_TORRENT_FILE_KEYS, localFileKeyObj);
   logger.info(`blobUrl 存入运行时缓存完毕`)
 }
 
@@ -197,14 +201,25 @@ const promisifySetTorrentResponse = async (file: WebTorrent.TorrentFile) => {
 }
 
 const bindListenEvents = () => {
+  logger.info("绑定 page listener")
   if('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', async (event) => {
       const globalTorrentFilesCache = cacheInstance.get('globalTorrentFilesCache') || {};
       const fetchPath = event.data.fetchPath;
       const file = globalTorrentFilesCache[fetchPath];
+      if (!file) {
+        // 通知 worker 当前请求缓存中不存在
+        self.navigator.serviceWorker.controller.postMessage({
+          type: event.data.type,
+          eventType: WorkerEventType.CHECK_IS_EXIST,
+          isExist: false
+        })
+      }
       const blobUrl = await promisifyFileGetBlob(file);
+      // 通知 worker 当前请求文件的 blobUrl
       self.navigator.serviceWorker.controller.postMessage({
-        type: event.data.callbackEventType,
+        type: event.data.type,
+        eventType: WorkerEventType.GET_BLOB_URL,
         blobUrl
       })
     });
@@ -221,9 +236,15 @@ export const checkBlobUrlFetch = async (blobUrl: string, reqPath: string) => {
 export const init = async () => {
   return new Promise((resolve, reject) => {
     if (window.navigator.serviceWorker) {
-      window.navigator.serviceWorker.register('./worker.js')
+      window.navigator.serviceWorker.register('./renderer-worker.js')
         .then(() => {
-          verifyRouter(() => resolve(true));
+          verifyRouter((err) => {
+            if (err) {
+              reject(err.message)
+            } else {
+              resolve(true)
+            }
+          });
         })
         .catch((e) => {
           const hintText = `Register service worker failed!`

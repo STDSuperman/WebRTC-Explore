@@ -3,11 +3,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
 const { CleanWebpackPlugin  } = require('clean-webpack-plugin')
 
+const WORKER_OUTPUT_NAME = 'renderer-worker';
+
 module.exports = {
   mode: 'development',
   entry: {
-    main: './src/main.tsx',
-    worker: './src/worker.ts'
+    'renderer-entry': './src/main.tsx',
+    [WORKER_OUTPUT_NAME]: './src/worker.ts'
   },
   module: {
     rules: [
@@ -49,7 +51,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
-      excludeChunks: ['worker']
+      excludeChunks: [WORKER_OUTPUT_NAME]
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],

@@ -1,8 +1,7 @@
 import { logger } from '@codesuperman/logger'
 import { CACHE_NAME, staticPrefix, localForageStorageKey } from './utils/constants'
 import localforage from 'localforage';
-import { cacheInstance } from '@/utils/cache';
-import { promisifyFileGetBlob } from '@/utils';
+import { WorkerEventType, LOCAL_TORRENT_FILE_KEYS, STATIC_PREFIX } from '@/utils/constants';
 import mitt from 'mitt'
 
 // eslint-disable-next-line
@@ -14,7 +13,6 @@ const blobURLEventPrefix = 'getBlobURL-';
 
 // 注册全局监听事件
 const listenPage2Worker = (event) => {
-  console.log("sw", event.data)
   emitter.emit(event.data?.type, event.data)
 }
 self.removeEventListener('message', listenPage2Worker);
@@ -47,10 +45,10 @@ self.addEventListener('fetch', async function (event) {
   const url = request.url;
   const fetchPath = url.slice(scope?.length ?? 0);
 
-  console.log(`Fetch request for: ${fetchPath}`);
+  logger.log(`Fetch request for: ${fetchPath}`);
   if (!fetchPath) {
-      logger.log('enter fetchPath')
-      event.respondWith(self.fetch('/index.html'));
+    logger.log('enter fetchPath')
+    event.respondWith(self.fetch('/index.html'));
   } else if (fetchPath === 'intercept/status') {
     event.respondWith(new Response('', { status: 234, statusText: 'intercepting' }))
   } else {
@@ -79,7 +77,7 @@ async function handleFetch(fetchUrl: string, event): Promise<Response> {
 // 读 DB 形式返回请求
 async function dbResHandler(fetchPath: string, event): Promise<Response> {
   const cacheDB = await caches.open(CACHE_NAME);
-  return cacheDB.match(`dist/${fetchPath}`)
+  return cacheDB.match(`${STATIC_PREFIX}/${fetchPath}`)
     .then(function (cache) {
         return cache || fetch(event.request);
     }).catch(function (err) {
@@ -90,31 +88,39 @@ async function dbResHandler(fetchPath: string, event): Promise<Response> {
 
 // 与浏览器事件交互获取 blobUrl 返回请求
 async function renderFromGlobalCache(fetchPath: string, event): Promise<Response> {
-  const blobUrl: string = await getBlobUrlFromPage(fetchPath) || "";
-
-  if (!blobUrl) {
-    console.log(event.request)
-    return fetch(event.request)
+  const transformedFetchPath = `${STATIC_PREFIX}/${fetchPath}`
+  if (await checkIsTorrentFileFetch(transformedFetchPath)) {
+    const blobUrl: string = await getBlobUrlFromPage(transformedFetchPath) || "";
+    return fetch(blobUrl);
   }
-  return fetch(blobUrl);
+  return fetch(event.request);
 }
 
-const getBlobUrlFromPage = (fetchPath: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const realFetchFilePath = `dist/${fetchPath}`;
+async function checkIsTorrentFileFetch(fetchPath: string): Promise<boolean> {
+  const torrentFilesKeysObj = await localforage.getItem(LOCAL_TORRENT_FILE_KEYS) || {};
+  return torrentFilesKeysObj[fetchPath];
+}
+
+const getBlobUrlFromPage = (transformedFetchPath: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const realFetchFilePath = transformedFetchPath;
     const currentEventType = `${blobURLEventPrefix}${realFetchFilePath}`;
 
     emitter.off(currentEventType);
     emitter.on(currentEventType, (data: any) => {
-      resolve(data.blobUrl);
+      if (data.eventType === WorkerEventType.GET_BLOB_URL) {
+        resolve(data.blobUrl);
+      } else if (data.eventType === WorkerEventType.CHECK_IS_EXIST) {
+        logger.log(`${transformedFetchPath} is not exist in global cache.`)
+        if (!data.isExist) resolve('');
+      }
     })
 
     self.clients.matchAll().then(clients => {
       clients.forEach(client => {
         client.postMessage({
-          type: 'getFileObject',
-          fetchPath: realFetchFilePath,
-          callbackEventType: currentEventType
+          type: currentEventType,
+          fetchPath: realFetchFilePath
         })
       })
     })

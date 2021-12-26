@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { render, init } from './torrent-render'
 import { Button, Input, Card, Row, Col, message } from 'antd'
 import './index.less'
@@ -45,6 +45,11 @@ export default function () {
         })
       })
   }
+
+  useEffect(() => {
+    // 默认注册 ServiceWorker
+    // startServiceWorker()
+  }, [])
   return (
     <div className="render-torrent-container">
       <Card
@@ -69,7 +74,7 @@ export default function () {
             <Button onClick={startDownloadTorrent}>开始抓取</Button>
           </Col>
           <Col>
-            <Button onClick={startServiceWorker}>测试拦截</Button>
+            <Button onClick={startServiceWorker}>手动拦截</Button>
           </Col>
         </Row>
       </Card>
