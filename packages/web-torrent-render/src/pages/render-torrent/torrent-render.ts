@@ -6,6 +6,7 @@ import { logger } from '@codesuperman/logger'
 import { cacheInstance } from '@/utils/cache';
 import { promisifyFileGetBlob } from '@/utils'
 import { WorkerEventType, LOCAL_TORRENT_FILE_KEYS } from '@/utils/constants';
+import { maxWebConns } from '@/utils/config';
 
 // const logger = console;
 
@@ -54,7 +55,7 @@ export const render = (magnetURI: string) => {
     const client = new WebTorrent();
     const torrentInstance = client.add(magnetURI, {
       path: './',
-      maxWebConns: 1000
+      maxWebConns
     }, (torrent) => {
       renderTorrent(torrent);
     });

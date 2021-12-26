@@ -40,7 +40,7 @@ export const rtcConfig = {
   ]
 }
 
-export const maxWebConns = 10000;
+export const maxWebConns = 10;
 
 export const torrentOpts = {
   announce: trackers,

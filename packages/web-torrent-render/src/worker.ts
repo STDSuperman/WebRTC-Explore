@@ -9,6 +9,9 @@ declare const self: ServiceWorkerGlobalScope;
 
 const emitter = mitt()
 const blobURLEventPrefix = 'getBlobURL-';
+let globalReqPool = [];
+const concurrentReqLimit = 10;
+let inProgressTaskNum = 0;
 
 
 // 注册全局监听事件
@@ -90,7 +93,7 @@ async function dbResHandler(fetchPath: string, event): Promise<Response> {
 async function renderFromGlobalCache(fetchPath: string, event): Promise<Response> {
   const transformedFetchPath = `${STATIC_PREFIX}/${fetchPath}`
   if (await checkIsTorrentFileFetch(transformedFetchPath)) {
-    const blobUrl: string = await getBlobUrlFromPage(transformedFetchPath) || "";
+    const blobUrl: string = await fetchTorrentFile(transformedFetchPath, event.clientId) || "";
     return fetch(blobUrl);
   }
   return fetch(event.request);
@@ -101,6 +104,47 @@ async function checkIsTorrentFileFetch(fetchPath: string): Promise<boolean> {
   return torrentFilesKeysObj[fetchPath];
 }
 
+
+const fetchTorrentFile = (
+  transformedFetchPath: string,
+  pageClientId: string
+): Promise<string> => {
+  return new Promise((resolve) => {
+    const getBlobUrlFc = async () => {
+      if (!(await checkPageClientIsExist(pageClientId))) {
+        resolve('');
+      }
+      const blobUrl = await getBlobUrlFromPage(transformedFetchPath);
+      inProgressTaskNum--;
+      scheduleNext();
+      resolve(blobUrl);
+    }
+    globalReqPool.push(getBlobUrlFc);
+    scheduleNext();
+  })
+}
+
+const checkPageClientIsExist = async (pageClientId: string) => {
+  const currentClientList = await self.clients.matchAll();
+  const targetClient = currentClientList.find(item => item.id === pageClientId);
+  // @ts-ignore
+  const isVisible = targetClient?.visibilityState === 'visible';
+  if (!isVisible) {
+    logger.info('清空任务队列')
+    globalReqPool = [];
+  }
+  return isVisible;
+}
+
+const scheduleNext = async () => {
+  if (globalReqPool.length > 0 && inProgressTaskNum < concurrentReqLimit) {
+    const task = globalReqPool.shift();
+    task();
+    inProgressTaskNum++;
+  }
+}
+
+// 与浏览器页面通信，请求获取 blobUrl
 const getBlobUrlFromPage = (transformedFetchPath: string): Promise<string> => {
   return new Promise((resolve) => {
     const realFetchFilePath = transformedFetchPath;

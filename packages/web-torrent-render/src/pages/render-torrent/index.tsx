@@ -48,7 +48,7 @@ export default function () {
 
   useEffect(() => {
     // 默认注册 ServiceWorker
-    // startServiceWorker()
+    startServiceWorker()
   }, [])
   return (
     <div className="render-torrent-container">
