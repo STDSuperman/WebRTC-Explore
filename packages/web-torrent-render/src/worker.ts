@@ -7,10 +7,14 @@ import mitt from 'mitt'
 // eslint-disable-next-line
 declare const self: ServiceWorkerGlobalScope;
 
+// 全局事件触发器
 const emitter = mitt()
 const blobURLEventPrefix = 'getBlobURL-';
+// 全局调度任务池
 let globalReqPool = [];
+// 并发数
 const concurrentReqLimit = -1; // -1 表示不限制
+// 当前正在运行的调度任务
 let inProgressTaskNum = 0;
 
 
@@ -99,12 +103,14 @@ async function renderFromGlobalCache(fetchPath: string, event): Promise<Response
   return fetch(event.request);
 }
 
+// 检测当前请求是否是种子中包含的文件请求
 async function checkIsTorrentFileFetch(fetchPath: string): Promise<boolean> {
   const torrentFilesKeysObj = await localforage.getItem(LOCAL_TORRENT_FILE_KEYS) || {};
   return torrentFilesKeysObj[fetchPath];
 }
 
 
+// 抓取种子中包含的文件数据
 const fetchTorrentFile = (
   transformedFetchPath: string,
   pageClientId: string
@@ -124,6 +130,7 @@ const fetchTorrentFile = (
   })
 }
 
+// 检测页面是否还存活（是否关闭 tab 或者刷新）
 const checkPageClientIsExist = async (pageClientId: string) => {
   const currentClientList = await self.clients.matchAll();
   const targetClient = currentClientList.find(item => item.id === pageClientId);
@@ -136,6 +143,7 @@ const checkPageClientIsExist = async (pageClientId: string) => {
   return !!targetClient;
 }
 
+// 调度下一个任务
 const scheduleNext = async () => {
   if (
     globalReqPool.length > 0
