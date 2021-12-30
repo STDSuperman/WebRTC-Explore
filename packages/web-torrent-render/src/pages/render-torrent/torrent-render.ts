@@ -10,6 +10,8 @@ import { maxWebConns } from '@/utils/config';
 
 // const logger = console;
 
+export type ICustomRender = (doc: string) => void;
+
 console.log(`WebRTC Support: ${WebTorrent.WEBRTC_SUPPORT}`);
 
 function addTorrentEvents(torrent: WebTorrent) {
@@ -43,7 +45,7 @@ function addTorrentEvents(torrent: WebTorrent) {
   }
 }
 
-export const render = (magnetURI: string) => {
+export const render = (magnetURI: string, customRender?: ICustomRender) => {
   return new Promise((resolve) => {
     // const magnetURI = TORRENT_PREFIX + torrentHash;
     logger.info(`Start Downloading torrent ${magnetURI}...`);
@@ -57,7 +59,7 @@ export const render = (magnetURI: string) => {
       path: './',
       maxWebConns
     }, (torrent) => {
-      renderTorrent(torrent);
+      renderTorrent(torrent, customRender);
     });
 
     resolve(torrentInstance);
@@ -83,7 +85,10 @@ export const render = (magnetURI: string) => {
  * 渲染种子文件
  * @param torrentInfo
  */
-const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
+const renderTorrent = async (
+  torrentInfo: WebTorrent.Torrent,
+  customRender: ICustomRender
+) => {
   console.log(torrentInfo);
   logger.info(`Torrent Downloaded! TorrentInfo: ${torrentInfo}`);
 
@@ -96,7 +101,7 @@ const renderTorrent = async (torrentInfo: WebTorrent.Torrent) => {
   // 初始化与 sw 通信事件
   bindListenEvents();
 
-  await renderEntryHtml(torrentInfo);
+  await renderEntryHtml(torrentInfo, customRender);
 }
 
 /**
@@ -159,7 +164,10 @@ const saveTorrentFileContext = async (torrentInfo: WebTorrent.torrentInfo) => {
  * 渲染入口文件
  * @param torrentInfo
  */
-const renderEntryHtml = (torrentInfo: WebTorrent.TorrentFile) => {
+const renderEntryHtml = (
+  torrentInfo: WebTorrent.TorrentFile,
+  customRender: ICustomRender
+) => {
   const indexHtmlFile = torrentInfo.files.find(file => {
     return file.name === INDEX_HTML_NAME
   });
@@ -173,7 +181,11 @@ const renderEntryHtml = (torrentInfo: WebTorrent.TorrentFile) => {
         return;
       }
       logger.log(`index.html: ${buffer.toString()}`)
-      document.body.innerHTML = buffer.toString()
+      if (customRender) {
+        customRender(buffer.toString());
+      } else {
+        document.body.innerHTML = buffer.toString();
+      }
     })
   }
 }

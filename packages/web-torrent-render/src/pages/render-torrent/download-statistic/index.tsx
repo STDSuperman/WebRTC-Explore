@@ -27,12 +27,15 @@ export default (props: IProps): ReactElement => {
           name="basic"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
+          initialValues={{
+            magnetURI: torrentInfo.magnetURI
+          }}
         >
           <Form.Item
             label="Torrent MagnetURI"
-            name="username"
+            name="magnetURI"
           >
-            <Input defaultValue={torrentInfo.magnetURI}/>
+            <Input/>
           </Form.Item>
         </Form>
         </Col>

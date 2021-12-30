@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { render, init } from './torrent-render'
 import { Button, Input, Card, Row, Col, message } from 'antd'
 import './index.less'
@@ -21,7 +21,8 @@ export default function () {
     peers: 0
   })
   const [searchParams] = useSearchParams()
-  const magnet = decodeURIComponent(searchParams.get('magnet'))
+  const magnet = decodeURIComponent(searchParams.get('magnet') || '')
+  const iframeRef = useRef(null);
 
   const startServiceWorker = () => {
     init()
@@ -36,23 +37,26 @@ export default function () {
 
   const startDownloadTorrent = (magnetURI = torrentMagnetURL) => {
     setShowDownloadPanel(true)
-    render(magnetURI).then((torrentInstance: any) => {
-      torrentInstance.on('download', function () {
-        const progress = (100 * torrentInstance.progress).toFixed(1)
-        setTorrentInfo({
-          downloadedBytes: prettierBytes(torrentInstance.downloaded),
-          downloadedSpeed: prettierBytes(torrentInstance.downloadSpeed) + '/s',
-          progress: `${progress}%`,
-          magnetURI,
-          peers: torrentInstance.numPeers
+    render(magnetURI, documentString => {
+      iframeRef.current.srcdoc = documentString;
+    })
+      .then((torrentInstance: any) => {
+        torrentInstance.on('download', function () {
+          const progress = (100 * torrentInstance.progress).toFixed(1)
+          setTorrentInfo({
+            downloadedBytes: prettierBytes(torrentInstance.downloaded),
+            downloadedSpeed: prettierBytes(torrentInstance.downloadSpeed) + '/s',
+            progress: `${progress}%`,
+            magnetURI,
+            peers: torrentInstance.numPeers
+          })
         })
       })
-    })
   }
 
   useEffect(() => {
     // 默认注册 ServiceWorker
-    startServiceWorker()
+    startServiceWorker();
   }, [])
   return (
     <div className="render-torrent-container">
@@ -87,6 +91,19 @@ export default function () {
             </Row>
           </Card>
           {showDownloadPanel && <DownloadStatistic torrentInfo={torrentInfo} />}
+          <Card
+            title="Render Page"
+            style={{
+              width: '90%',
+              margin: '20px auto'
+            }}
+          >
+            <iframe ref={iframeRef} style={{
+              width: '100%',
+              height: '100%',
+              border: 'none'
+            }}></iframe>
+          </Card>
         </div>
       )}
     </div>
