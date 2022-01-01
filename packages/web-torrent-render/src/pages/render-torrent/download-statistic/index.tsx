@@ -15,6 +15,7 @@ interface IProps {
 
 export default (props: IProps): ReactElement => {
   const { torrentInfo } = props
+  console.log(torrentInfo)
   return (
     <Card title="Download Info" style={{
         width: '90%',
@@ -27,9 +28,7 @@ export default (props: IProps): ReactElement => {
           name="basic"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
-          initialValues={{
-            magnetURI: torrentInfo.magnetURI
-          }}
+          fields={[{ name: ['magnetURI'], value: torrentInfo.magnetURI }] }
         >
           <Form.Item
             label="Torrent MagnetURI"
