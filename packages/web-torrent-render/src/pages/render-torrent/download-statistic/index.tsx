@@ -15,7 +15,6 @@ interface IProps {
 
 export default (props: IProps): ReactElement => {
   const { torrentInfo } = props
-  console.log(torrentInfo)
   return (
     <Card title="Download Info" style={{
         width: '90%',

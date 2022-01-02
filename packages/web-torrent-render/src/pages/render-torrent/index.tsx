@@ -20,15 +20,19 @@ export default function () {
     magnetURI: '',
     peers: 0
   })
+  const [registerSwStatus, setRegisterSwStatus] = useState(false);
   const [searchParams] = useSearchParams()
   const magnet = decodeURIComponent(searchParams.get('magnet') || '')
-  const iframeRef = useRef(null);
+  const iframeRef = useRef(null)
 
   const startServiceWorker = () => {
     init()
       .then(() => {
         message.success('注册 ServiceWorker 成功')
         magnet && startDownloadTorrent(magnet)
+        setTimeout(() => {
+          setRegisterSwStatus(true)
+        }, 3000)
       })
       .catch(msg => {
         console.error(msg)
@@ -38,25 +42,41 @@ export default function () {
   const startDownloadTorrent = (magnetURI = torrentMagnetURL) => {
     setShowDownloadPanel(true)
     render(magnetURI, documentString => {
+      // const documentStringBlob = new Blob([documentString], {type : 'text/html'})
+      // iframeRef.current.src = URL.createObjectURL(documentStringBlob);
       iframeRef.current.srcdoc = documentString;
-    })
-      .then((torrentInstance: any) => {
-        torrentInstance.on('download', function () {
-          const progress = (100 * torrentInstance.progress).toFixed(1)
-          setTorrentInfo({
-            downloadedBytes: prettierBytes(torrentInstance.downloaded),
-            downloadedSpeed: prettierBytes(torrentInstance.downloadSpeed) + '/s',
-            progress: `${progress}%`,
-            magnetURI,
-            peers: torrentInstance.numPeers
-          })
+    }).then((torrentInstance: any) => {
+      torrentInstance.on('download', function () {
+        const progress = (100 * torrentInstance.progress).toFixed(1)
+        setTorrentInfo({
+          downloadedBytes: prettierBytes(torrentInstance.downloaded),
+          downloadedSpeed: prettierBytes(torrentInstance.downloadSpeed) + '/s',
+          progress: `${progress}%`,
+          magnetURI,
+          peers: torrentInstance.numPeers
         })
       })
+    })
+  }
+
+  const renderIframePage = () => {
+    return (
+      <iframe
+        ref={iframeRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none'
+        }}
+        allow-same-origin="true"
+        sandbox="allow-same-origin allow-scripts"
+      ></iframe>
+    )
   }
 
   useEffect(() => {
     // 默认注册 ServiceWorker
-    startServiceWorker();
+    // startServiceWorker()
   }, [])
   return (
     <div className="render-torrent-container">
@@ -98,11 +118,7 @@ export default function () {
               margin: '20px auto'
             }}
           >
-            <iframe ref={iframeRef} style={{
-              width: '100%',
-              height: '100%',
-              border: 'none'
-            }}></iframe>
+            { registerSwStatus && renderIframePage() }
           </Card>
         </div>
       )}
